@@ -1,0 +1,71 @@
+// main.cpp — CLI executable entry point
+//
+// This file is a skeleton for a command-line application built with
+// aw_add_executable().  It provides a basic argument parser with
+// --help, --version, and --verbose flags.
+
+#pragma once
+
+/**
+ * @file main.cpp
+ * @brief CLI executable entry point with argument parsing skeleton.
+ */
+
+#include <iostream>
+#include <string>
+#include <string_view>
+
+/**
+ * @brief Print usage information.
+ * @param program_name The name of the program (argv[0]).
+ */
+static void print_usage(std::string_view program_name) {
+    std::cerr << "Usage: " << program_name << " [OPTIONS]\n"
+              << "Options:\n"
+              << "  -h, --help     Show this help message\n"
+              << "  -v, --version  Show version information\n"
+              << "  -V, --verbose  Enable verbose output\n";
+}
+
+/**
+ * @brief Parse command-line arguments.
+ * @param[in]  argc  Argument count (from main).
+ * @param[in]  argv  Argument vector (from main).
+ * @param[out] verbose  Set to true if --verbose was requested.
+ * @return true if parsing succeeded, false if --help was requested.
+ */
+static bool parse_args(int argc, char* argv[], bool& verbose) {
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "-h" || arg == "--help") {
+            print_usage(argv[0]);
+            return false;
+        }
+        if (arg == "-v" || arg == "--version") {
+            std::cout << "version 1.0.0\n";
+            return false;
+        }
+        if (arg == "-V" || arg == "--verbose") {
+            verbose = true;
+        }
+    }
+    return true;
+}
+
+/**
+ * @brief Application entry point.
+ * @param argc Argument count.
+ * @param argv Argument vector.
+ * @return Exit code (0 = success, 1 = error).
+ */
+int main(int argc, char* argv[]) {
+    bool verbose = false;
+    if (!parse_args(argc, argv, verbose)) {
+        return 0;  // --help or --version requested
+    }
+
+    // Application logic here.
+    std::cout << "Hello from CLI executable!\n";
+
+    return 0;
+}

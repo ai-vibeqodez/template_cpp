@@ -1,0 +1,23 @@
+// AppDelegate.swift — macOS app entry point
+//
+// This file is a skeleton for a macOS GUI application built with
+// aw_add_gui_executable().  It uses SwiftUI for the application UI.
+
+import SwiftUI
+
+/**
+ * @file AppDelegate.swift
+ * @brief macOS app entry point using SwiftUI.
+ */
+
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup {
+            Text("Hello from macOS GUI!")
+                .padding()
+        }
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+    }
+}

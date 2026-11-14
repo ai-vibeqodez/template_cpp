@@ -1,0 +1,45 @@
+# =============================================================================
+# Example: how to call aw_add_gui_executable() from your project's
+# root CMakeLists.txt.
+#
+# Copy this block and adapt the target name, source/header paths, and
+# optional arguments to your project.
+#
+# Platform-specific notes:
+#   - Windows: the WIN32 flag produces a GUI subsystem executable (no
+#     console window).  The resource script (.rc) is included via
+#     RESOURCES.
+#   - macOS: the MACOSX_BUNDLE flag produces a .app bundle with an
+#     Info.plist generated from the template.
+#   - Linux: a standard binary is produced; a .desktop file and icon
+#     are installed for desktop integration.
+# =============================================================================
+
+# --- CLI executable (for comparison) ---------------------------------------
+# aw_add_executable(TARGET my_cli
+#     SOURCES src/my_cli.cpp
+#     LINK_LIBRARIES aw::my_lib
+#     COMPILE_DEFINITIONS MY_CLI_VERSION="1.0.0"
+# )
+
+# --- Windows GUI executable ------------------------------------------------
+# aw_add_gui_executable(TARGET my_gui
+#     SOURCES src/my_gui.cpp
+#     RESOURCES src/icon.rc
+#     APP_NAME "My GUI App"
+#     LINK_LIBRARIES aw::my_lib
+# )
+
+# --- macOS GUI executable --------------------------------------------------
+# aw_add_gui_executable(TARGET my_gui
+#     SOURCES src/my_gui.cpp
+#     APP_NAME "My GUI App"
+#     LINK_LIBRARIES aw::my_lib
+# )
+
+# --- Linux GUI executable --------------------------------------------------
+# aw_add_gui_executable(TARGET my_gui
+#     SOURCES src/my_gui.cpp
+#     APP_NAME "My GUI App"
+#     LINK_LIBRARIES aw::my_lib
+# )
