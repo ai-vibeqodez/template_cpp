@@ -8,50 +8,33 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
 
 project(template_cpp VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 
-# ── Dependencies ─────────────────────────────────────────────────────
+# Dependencies
 find_package(Threads REQUIRED)
 
-# ── Include shared CMake infrastructure ──────────────────────────────
-include(cmake/AwProjectDefaults.cmake)
-
-# ── Set the project prefix for AwProjectDefaults ─────────────────────
+# Set project prefix for AwProjectDefaults (must be before include)
 set(AW_PROJECT_PREFIX "TEMPLATE_CPP")
 
-# ── Library target ───────────────────────────────────────────────────
-add_library(${PROJECT_NAME} STATIC
-    src/hello.cpp
+# Include shared CMake infrastructure
+include(cmake/AwProjectDefaults.cmake)
+
+# ── Load archetype helpers ─────────────────────────────────────────────
+include(archetypes/01_core.cmake)
+include(archetypes/02_shared_plugin.cmake)
+include(archetypes/03_modules.cmake)
+include(archetypes/04_executables.cmake)
+include(archetypes/05_service.cmake)
+include(archetypes/06_kernel.cmake)
+
+# ── Library target (delegated to archetype helpers, full impl in Task 02) ─
+aw_add_static_library(${PROJECT_NAME}
+    SOURCES src/hello.cpp
+    HEADERS include/aw/template_cpp/hello.hpp
+    LINK_LIBRARIES Threads::Threads
 )
-add_library(aw::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
-target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-target_sources(${PROJECT_NAME}
-    PUBLIC
-        FILE_SET HEADERS
-        BASE_DIRS include
-        FILES
-            include/aw/template_cpp/hello.hpp
-)
-
-target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
-
-# Pass version as a compile definition so the library can report it.
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     TEMPLATE_CPP_VERSION="${PROJECT_VERSION}")
 
-# ── Apply shared defaults ────────────────────────────────────────────
-_aw_set_warnings(${PROJECT_NAME})
-_aw_apply_sanitizers(${PROJECT_NAME})
-_aw_apply_coverage(${PROJECT_NAME})
-_aw_add_lint(${PROJECT_NAME})
-
-# ── Install ──────────────────────────────────────────────────────────
-_aw_setup_install(${PROJECT_NAME} ${PROJECT_NAME} "aw::" include)
-
-# ── Examples (top-level only) ────────────────────────────────────────
+# ── Examples, Tests, Install (using public helpers) ──────────────────
 option(AW_TEMPLATE_CPP_BUILD_EXAMPLES
        "Build aw::template_cpp example applications" ${AW_TEMPLATE_CPP_IS_TOP_LEVEL})
 
@@ -59,7 +42,6 @@ if(AW_TEMPLATE_CPP_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
-# ── Tests (top-level only) ───────────────────────────────────────────
 option(AW_TEMPLATE_CPP_BUILD_TESTS
        "Build aw::template_cpp unit tests" ${AW_TEMPLATE_CPP_IS_TOP_LEVEL})
 
@@ -67,3 +49,6 @@ if(AW_TEMPLATE_CPP_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+option(AW_TEMPLATE_CPP_INSTALL
+       "Generate install rules and package config" ${AW_TEMPLATE_CPP_IS_TOP_LEVEL})

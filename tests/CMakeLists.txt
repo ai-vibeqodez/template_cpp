@@ -18,4 +18,4 @@ target_link_libraries(aw_template_cpp_tests PRIVATE
     Catch2::Catch2WithMain
 )
 
-_aw_setup_tests(aw_template_cpp_tests)
+aw_setup_tests(aw_template_cpp_tests)

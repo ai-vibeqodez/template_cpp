@@ -6,7 +6,7 @@ Master progress tracker for the `template-cpp` expansion into a full-featured C+
 
 | # | Task | Status | Dependencies | Summary |
 |---|------|--------|--------------|---------|
-| 01 | [Task 01: CMake Helpers & Structure](01_cmake_helpers_and_structure.md) | [ ] | — | Refactor `AwProjectDefaults.cmake` and create `archetypes/` layout for conflict-free `git pull template main` |
+| 01 | [Task 01: CMake Helpers & Structure](01_cmake_helpers_and_structure.md) | [x] | — | Refactor `AwProjectDefaults.cmake` and create `archetypes/` layout for conflict-free `git pull template main` |
 | 02 | [Task 02: Header-Only & Static Libraries](02_header_only_and_static.md) | [ ] | 01 | Implement `aw_add_header_only_library` (INTERFACE + FILE_SET HEADERS) and refine `aw_add_static_library` |
 | 03 | [Task 03: Shared Library & Plugin Modules](03_shared_lib_and_plugin.md) | [ ] | 01 | Implement `aw_add_shared_library` (cross-platform AW_API macros) and `aw_add_plugin_module` (MODULE target + extern "C" factory) |
 | 04 | [Task 04: C++20 Modules](04_cxx20_modules.md) | [ ] | 01 | Implement `aw_add_cxx_module_library` (CMake 3.28+ FILE_SET CXX_MODULES) with compiler compatibility notes |

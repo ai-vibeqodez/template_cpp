@@ -129,7 +129,16 @@ endfunction()
 option(AW_${AW_PROJECT_PREFIX}_INSTALL
        "Generate install rules and package config" ${AW_${AW_PROJECT_PREFIX}_IS_TOP_LEVEL})
 
-function(_aw_setup_install TARGET EXPORT_NAME NAMESPACE INCLUDE_DIR)
+# Public: aw_setup_install()
+#
+# Configure install rules for a target.  Exports targets, writes a package
+# config file, and installs headers via FILE_SET HEADERS (CMake 3.23+).
+#
+# @param TARGET        Target name to install.
+# @param EXPORT_NAME   Export set name (used for generated *.cmake files).
+# @param NAMESPACE     Imported target namespace prefix (e.g. "aw::").
+# @param INCLUDE_DIR   Path to the public header directory.
+function(aw_setup_install TARGET EXPORT_NAME NAMESPACE INCLUDE_DIR)
     if(NOT AW_${AW_PROJECT_PREFIX}_INSTALL)
         return()
     endif()
@@ -171,7 +180,14 @@ endfunction()
 # ---------------------------------------------------------------------------
 # Test discovery (Catch2) — only when top-level
 # ---------------------------------------------------------------------------
-function(_aw_setup_tests TEST_EXECUTABLE)
+
+# Public: aw_setup_tests()
+#
+# Register tests with CTest using Catch2 test discovery.  A no-op when the
+# project is consumed as a dependency (not top-level).
+#
+# @param TEST_EXECUTABLE  Name of the test executable target.
+function(aw_setup_tests TEST_EXECUTABLE)
     if(NOT AW_${AW_PROJECT_PREFIX}_IS_TOP_LEVEL)
         return()
     endif()
@@ -188,7 +204,14 @@ endfunction()
 # ---------------------------------------------------------------------------
 # Lint helper (clang-tidy) — top-level only
 # ---------------------------------------------------------------------------
-function(_aw_add_lint TARGET)
+
+# Public: aw_add_lint()
+#
+# Attach clang-tidy to a target when the program is available and the project
+# is top-level.  A no-op otherwise.
+#
+# @param TARGET  Name of the target to lint.
+function(aw_add_lint TARGET)
     if(NOT AW_${AW_PROJECT_PREFIX}_IS_TOP_LEVEL)
         return()
     endif()
@@ -198,6 +221,24 @@ function(_aw_add_lint TARGET)
             CXX_CLANG_TIDY "${_AW_CLANG_TIDY}")
     endif()
     unset(_AW_CLANG_TIDY CACHE)
+endfunction()
+
+# ---------------------------------------------------------------------------
+# Archetype helper loader
+# ---------------------------------------------------------------------------
+
+# Public: aw_include_archetypes()
+#
+# Include all *.cmake files from the given directory.  Used by the root
+# CMakeLists.txt to load archetype helper functions defined in archetypes/.
+#
+# @param DIR  Directory path relative to CMAKE_CURRENT_SOURCE_DIR.
+function(aw_include_archetypes DIR)
+    file(GLOB _aw_arch_files "${DIR}/*.cmake")
+    foreach(_aw_file IN LISTS _aw_arch_files)
+        include("${_aw_file}")
+    endforeach()
+    unset(_aw_arch_files)
 endfunction()
 
 # ---------------------------------------------------------------------------
