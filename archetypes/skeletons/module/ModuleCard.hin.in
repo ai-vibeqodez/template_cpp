@@ -1,0 +1,32 @@
+// ModuleCard.hin — C++20 module interface unit
+//
+// Compile with:
+//   g++ -fmodules -std=c++20 -c ModuleCard.hin         (GCC)
+//   clang++ -fmodules-ts -std=c++20 -c ModuleCard.hin  (Clang)
+//   cl /experimental:module /std:c++latest /c ModuleCard.hin  (MSVC)
+
+export module ModuleCard;
+
+#include <string_view>
+
+/**
+ * @export ModuleCard
+ * @brief Exported module interface — consumers use `import ModuleCard;`.
+ */
+export namespace aw::module_card {
+
+/**
+ * @class ModuleCard
+ * @brief A C++20 module-based utility class.
+ */
+class [[nodiscard]] ModuleCard {
+public:
+    /**
+     * @brief Returns a greeting string.
+     * @param[in] name The name to greet.
+     * @return A greeting message.
+     */
+    [[nodiscard]] static std::string_view greet(std::string_view name);
+};
+
+} // namespace aw::module_card

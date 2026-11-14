@@ -9,7 +9,7 @@ Master progress tracker for the `template-cpp` expansion into a full-featured C+
 | 01 | [Task 01: CMake Helpers & Structure](01_cmake_helpers_and_structure.md) | [x] | — | Refactor `AwProjectDefaults.cmake` and create `archetypes/` layout for conflict-free `git pull template main` |
 | 02 | [Task 02: Header-Only & Static Libraries](02_header_only_and_static.md) | [x] | 01 | Implement `aw_add_header_only_library` (INTERFACE + FILE_SET HEADERS) and refine `aw_add_static_library` |
 | 03 | [Task 03: Shared Library & Plugin Modules](03_shared_lib_and_plugin.md) | [x] | 01 | Implement `aw_add_shared_library` (cross-platform AW_API macros) and `aw_add_plugin_module` (MODULE target + extern "C" factory) |
-| 04 | [Task 04: C++20 Modules](04_cxx20_modules.md) | [ ] | 01 | Implement `aw_add_cxx_module_library` (CMake 3.28+ FILE_SET CXX_MODULES) with compiler compatibility notes |
+| 04 | [Task 04: C++20 Modules](04_cxx20_modules.md) | [x] | 01 | Implement `aw_add_cxx_module_library` (CMake 3.28+ FILE_SET CXX_MODULES) with compiler compatibility notes |
 | 05 | [Task 05: Executables & GUI](05_executables_and_gui.md) | [ ] | 01 | Implement `aw_add_executable` (CLI) and `aw_add_gui_executable` (Win32 subsystem, macOS .app, Linux binary) |
 | 06 | [Task 06: System Service & Daemon](06_system_service_daemon.md) | [ ] | 05 | Implement `aw_add_service_executable` (Windows SCM, POSIX daemon, systemd .service template) |
 | 07 | [Task 07: Kernel Drivers](07_kernel_drivers.md) | [ ] | 01 | Implement `aw_add_kernel_driver` (Windows WDK .sys, Linux .ko Kbuild) |
