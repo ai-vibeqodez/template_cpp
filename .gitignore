@@ -46,3 +46,7 @@ _deps/
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Ambiguous name — conflicts with C++20 <version> header when project root
+# is in the include path (target_include_directories adds CMAKE_CURRENT_SOURCE_DIR).
+version
