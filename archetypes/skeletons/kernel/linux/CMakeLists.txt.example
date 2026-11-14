@@ -1,0 +1,15 @@
+# =============================================================================
+# Example: how to call aw_add_kernel_driver() from your project's
+# root CMakeLists.txt for a Linux kernel module.
+#
+# Copy this block and adapt the target name, source paths, and optional
+# arguments to your project.
+# =============================================================================
+
+aw_add_kernel_driver(TARGET my_module
+    SOURCES src/module.c
+    PLATFORM linux
+    LINUX_VERSION 6.6
+    MODULE_NAME "my_module"
+    KERNEL_SRC_DIR /lib/modules/$(uname -r)/build
+)

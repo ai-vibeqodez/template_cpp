@@ -1,0 +1,23 @@
+# =============================================================================
+# Makefile.in — Legacy Makefile for Linux kernel module build
+#
+# Alternative to Kbuild for projects that prefer a traditional Makefile.
+# Not used by aw_add_kernel_driver() (which generates Kbuild), but
+# provided for reference and manual builds.
+# =============================================================================
+
+# Module name and source files
+obj-m := @MODULE_NAME@.o
+@MODULE_NAME@-y := module.o
+
+# Kernel source directory
+KDIR ?= /lib/modules/$(shell uname -r)/build
+
+# Build target: make -C <kdir> M=<pwd> modules
+all:
+	$(MAKE) -C $(KDIR) M=$(PWD) modules
+
+clean:
+	$(MAKE) -C $(KDIR) M=$(PWD) clean
+
+.PHONY: all clean
