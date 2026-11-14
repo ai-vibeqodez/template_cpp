@@ -4,8 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <br />
 [![CI](https://github.com/ai-warevo/template-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-warevo/template-cpp/actions/workflows/ci.yml)
+[![Tests & Coverage](https://github.com/ai-warevo/template-cpp/actions/workflows/test.yml/badge.svg)](https://github.com/ai-warevo/template-cpp/actions/workflows/test.yml)
 <br />
-[![Tests](https://github.com/ai-warevo/template-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-warevo/template-cpp/actions/workflows/ci.yml)
+[![Coverage](https://raw.githubusercontent.com/ai-warevo/template-cpp/refs/heads/badges/coverage.svg)](https://ai-warevo.github.io/template-cpp)
 
 > **A production-grade C++20 project template for the [ai-warevo](https://github.com/ai-warevo) ecosystem.**  
 > *Designed for conflict-free manual `git pull template main` updates.* 🪄
