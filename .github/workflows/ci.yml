@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, master ]
+
+permissions:
+  contents: write
 
 jobs:
   build-and-test:
@@ -15,6 +19,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - name: Windows-MSVC
+            os: windows-latest
+            cc: cl
+            cxx: cl
           - name: Linux-GCC
             os: ubuntu-latest
             cc: gcc
@@ -32,19 +40,68 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure & Build
+      - name: Configure & Install CMake
         env:
           CC: ${{ matrix.cc }}
           CXX: ${{ matrix.cxx }}
         run: |
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
+            -DAW_TEMPLATE_CPP_BUILD_EXAMPLES=ON \
             -DAW_TEMPLATE_CPP_BUILD_TESTS=ON \
-            -DAW_TEMPLATE_CPP_WARNINGS_AS_ERRORS=ON
-          cmake --build build --parallel
+            -DAW_TEMPLATE_CPP_WARNINGS_AS_ERRORS=ON \
+            -DCMAKE_INSTALL_PREFIX=install
 
-      - name: Run Tests
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build --config Release --parallel
+
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
+        run: cmake --build build --parallel
+
+      - name: Install
+        run: cmake --install build --config Release
+
+      - name: Run Tests (Windows)
+        if: runner.os == 'Windows'
+        run: ctest --test-dir build --build-config Release --output-on-failure --parallel
+
+      - name: Run Tests (Unix)
+        if: runner.os != 'Windows'
         run: ctest --test-dir build --output-on-failure --parallel
+
+      - name: Run Examples (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-ChildItem .\build\examples\Release\aw_template_cpp_example_*.exe | ForEach-Object {
+            Write-Host "=== $($_.Name)"
+            & $_.FullName
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Run Examples (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          for example in ./build/examples/aw_template_cpp_example_*; do
+            echo "=== $example"
+            "$example"
+          done
+
+      - name: Package Artifacts (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path install\* -DestinationPath aw_template_cpp-${{ matrix.name }}.zip
+
+      - name: Package Artifacts (Unix)
+        if: runner.os != 'Windows'
+        run: tar -czvf aw_template_cpp-${{ matrix.name }}.tar.gz -C install .
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aw_template_cpp-${{ matrix.name }}
+          path: aw_template_cpp-${{ matrix.name }}.*
 
   sanitizers:
     name: Sanitizers (${{ matrix.sanitizer }})
@@ -91,3 +148,69 @@ jobs:
       - name: Check formatting
         run: |
           find include src -name '*.hpp' -o -name '*.cpp' | xargs clang-format --dry-run --Werror
+
+  release:
+    name: Publish GitHub Release
+    needs: [ build-and-test ]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Extract release notes from CHANGELOG.md
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+
+          # Body of "## [<version>]" up to the next "## [" heading or the link references; CRLF-safe.
+          notes="$(tr -d '\r' < CHANGELOG.md | awk -v v="$version" '
+            /^## \[/ { if (found) exit; if (index($0, "## [" v "]") == 1) { found = 1; next } }
+            found && /^\[[^]]+\]:/ { exit }
+            found { lines[++n] = $0 }
+            END {
+              first = 1; while (first <= n && lines[first] ~ /^[ \t]*$/) first++
+              while (n >= first && lines[n] ~ /^[ \t]*$/) n--
+              for (i = first; i <= n; i++) print lines[i]
+            }')"
+
+          if [ -z "$notes" ]; then
+            echo "::error::CHANGELOG.md has no entries for [$version]. Run scripts/release.sh (or release.ps1) to cut releases."
+            exit 1
+          fi
+
+          {
+            printf '## ⚡ aw::template_cpp %s\n\n' "$TAG"
+            printf '%s\n\n' "$notes"
+            cat <<'EOF'
+          ### 🚀 Quick CMake Integration (`FetchContent`)
+          ```cmake
+          include(FetchContent)
+          FetchContent_Declare(
+              aw_template_cpp
+              GIT_REPOSITORY https://github.com/ai-warevo/template-cpp.git
+          EOF
+            printf '    GIT_TAG        %s\n' "$TAG"
+            cat <<'EOF'
+          )
+          FetchContent_MakeAvailable(aw_template_cpp)
+          target_link_libraries(your_target PRIVATE aw::template_cpp)
+          ```
+          EOF
+          } > release_body.md
+
+          cat release_body.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          body_path: release_body.md
