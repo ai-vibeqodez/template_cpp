@@ -59,21 +59,28 @@ git push -u origin main
 
 ### Step 2: Pick an archetype
 
-Open `CMakeLists.txt`. You'll see this line:
+The fastest way — one command scaffolds everything:
 
-```cmake
-aw_add_static_library(${PROJECT_NAME}
-    SOURCES src/hello.cpp
-    HEADERS include/aw/template_cpp/hello.hpp
-    LINK_LIBRARIES Threads::Threads
-)
+```sh
+make init-<archetype> PROJECT=<name>
 ```
 
-That's the **static library** archetype. To switch to another archetype:
+| Command | What it does |
+|---------|--------------|
+| `make init-list` | Show all available archetypes |
+| `make init-static PROJECT=my_lib` | Scaffold a static library |
+| `make init-shared PROJECT=my_app` | Scaffold a shared library / DLL |
+| `make init-header-only PROJECT=my_utils` | Scaffold a header-only library |
+| `make init-plugin PROJECT=my_plugin` | Scaffold a plugin module |
+| `make init-module PROJECT=my_mod` | Scaffold a C++20 module |
+| `make init-cli PROJECT=my_cli` | Scaffold a CLI executable |
+| `make init-gui PROJECT=my_gui` | Scaffold a GUI executable |
+| `make init-service PROJECT=my_svc` | Scaffold a system service / daemon |
+| `make init-kernel PROJECT=my_drv` | Scaffold a kernel driver |
 
-1. **Replace** `aw_add_static_library(...)` with the helper for your chosen archetype (see the table below).
-2. **Copy** the skeleton files from `archetypes/skeletons/<archetype>/` into your project directories.
-3. **Rename** the skeleton files to match your project.
+This copies skeleton files from `archetypes/skeletons/<archetype>/` into `src/`, `include/`, `tests/` and renames them to your project name. **Existing files are never overwritten.**
+
+Alternatively, edit `CMakeLists.txt` manually:
 
 Here are the helpers:
 

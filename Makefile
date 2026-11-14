@@ -19,6 +19,7 @@ else
 endif
 
 .PHONY: build test lint format clean release release-dry-run
+.PHONY: init init-list
 
 # ── Build (default target) ───────────────────────────────────────────
 build:
@@ -74,3 +75,33 @@ release:
 
 release-dry-run:
 	$(RELEASE_CMD) $(RELEASE_DRY)
+
+# ── Archetype scaffolding ────────────────────────────────────────────
+# Usage: make init-<archetype> PROJECT=<name>
+#   e.g. make init-shared PROJECT=my_app
+#   Copies skeleton files from archetypes/skeletons/<archetype>/ into
+#   include/, src/, tests/ and renames them to $PROJECT.
+#   Existing project files are never overwritten.
+
+init-list:
+	@echo "Available archetypes:"
+	@for a in header_only static shared plugin module cli gui service kernel; do echo "  $$a"; done
+	@echo ""
+	@echo "Usage: make init-<archetype> PROJECT=<name>"
+	@echo "  e.g. make init-shared PROJECT=my_app"
+
+init: init-list
+
+init-header_only init-static init-shared init-plugin init-module init-cli init-gui init-service init-kernel:
+	@if [ -z "$(PROJECT)" ]; then \
+	    echo "ERROR: PROJECT not set."; \
+	    echo "Usage: make $@ PROJECT=<name>"; \
+	    exit 1; \
+	fi
+	@ARCHETYPE="$@"; \
+	ARCHETYPE="$${ARCHETYPE#init-}"; \
+	if [ "$(OS)" = "Windows_NT" ]; then \
+	    powershell -NoProfile -ExecutionPolicy Bypass -File scripts/init-archetype.ps1 -Archetype "$$ARCHETYPE" -Project "$(PROJECT)"; \
+	else \
+	    bash scripts/init-archetype.sh "$$ARCHETYPE" "$(PROJECT)"; \
+	fi
