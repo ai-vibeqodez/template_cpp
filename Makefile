@@ -1,94 +1,69 @@
-BUILD_TYPE = Debug
-BASE_FLAGS = -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+# ── template-cpp: C++20/23 project archetype templates ────────────────
+#
+# Usage (from this repo):
+#   make init-list              — list available archetypes
+#   make init-<archetype> PROJECT=<name>
+#       Copies examples/<archetype>/ to the current directory,
+#       replaces __PROJECT__ placeholders with your project name.
+#
+# Usage (after init, in a generated project):
+#   make build                   — configure + build
+#   make test                    — build + run tests
+#   make lint                    — run clang-tidy (if available)
+#   make format                  — run clang-format (if available)
+#   make clean                   — remove build/
 
-ifeq ($(OS),Windows_NT)
-    PLATFORM = windows
-    EXT = .exe
-else
-    PLATFORM = linux
-    EXT =
-endif
+BUILD_TYPE ?= Debug
+BUILD_DIR  ?= build
 
-BUILD_DIR = build/$(PLATFORM)
-BUILD_DIR_TEST = $(BUILD_DIR)/test
-BUILD_DIR_DEMO = $(BUILD_DIR)/demo
-ifeq ($(PLATFORM),windows)
-    DEMO_DIR = ./$(BUILD_DIR_DEMO)/examples/$(BUILD_TYPE)
-else
-    DEMO_DIR = ./$(BUILD_DIR_DEMO)/examples
-endif
+.PHONY: build test lint format clean init-list \
+        init init-header_only init-static init-shared init-plugin \
+        init-module init-cli init-gui init-service init-kernel
 
-.PHONY: build test lint format clean release release-dry-run
-.PHONY: init init-list
-
-# ── Build (default target) ───────────────────────────────────────────
+# ── Build targets (for generated projects) ───────────────────────────
 build:
-	cmake -B $(BUILD_DIR) --fresh $(BASE_FLAGS) \
-	    -DAW_TEMPLATE_CPP_BUILD_TESTS=OFF \
-	    -DAW_TEMPLATE_CPP_BUILD_EXAMPLES=OFF
+	cmake -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
 	cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) --parallel
 
-# ── Run tests ────────────────────────────────────────────────────────
-test:
-	cmake -B $(BUILD_DIR_TEST) --fresh $(BASE_FLAGS) \
-	    -DAW_TEMPLATE_CPP_BUILD_TESTS=ON \
-	    -DAW_TEMPLATE_CPP_BUILD_EXAMPLES=OFF
-	cmake --build $(BUILD_DIR_TEST) --config $(BUILD_TYPE) --parallel
-	ctest --test-dir $(BUILD_DIR_TEST) -C $(BUILD_TYPE) --output-on-failure
+test: build
+	cmake -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+	    -DAW__PROJECT_UPPER___BUILD_TESTS=ON \
+	    -DAW__PROJECT_UPPER___BUILD_EXAMPLES=OFF
+	cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) --parallel
+	ctest --test-dir $(BUILD_DIR) -C $(BUILD_TYPE) --output-on-failure
 
-# ── Run clang-tidy on changed files (top-level only) ─────────────────
 lint:
 	@if command -v clang-tidy >/dev/null 2>&1; then \
-	    find include src -name '*.hpp' -o -name '*.cpp' | \
+	    find include src -name '*.hpp' -o -name '*.cpp' 2>/dev/null | \
 	        xargs clang-tidy -p $(BUILD_DIR) -- \
 	            -std=c++20 -I include || true; \
 	else \
-	    echo "clang-tidy not found; install it or configure with Ninja for compile_commands.json"; \
+	    echo "clang-tidy not found; install clang-tidy"; \
 	fi
 
-# ── Format with clang-format ─────────────────────────────────────────
 format:
 	@if command -v clang-format >/dev/null 2>&1; then \
-	    find include src -name '*.hpp' -o -name '*.cpp' | \
-	        xargs clang-format -i; \
+	    find include src -name '*.hpp' -o -name '*.cpp' 2>/dev/null | \
+	        xargs clang-format -i || true; \
 	else \
 	    echo "clang-format not found; install clang-format >= 15"; \
 	fi
 
-# ── Clean build artifacts ────────────────────────────────────────────
 clean:
 	rm -rf $(BUILD_DIR)
 
-# ── Release (delegates to ai-warevo release scripts) ─────────────────
-ifeq ($(PLATFORM),windows)
-    RELEASE_CMD = powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1
-    RELEASE_PUSH = -Push
-    RELEASE_DRY = -DryRun
-else
-    RELEASE_CMD = bash scripts/release.sh
-    RELEASE_PUSH = --push
-    RELEASE_DRY = --dry-run
-endif
-
-release:
-	$(RELEASE_CMD) $(if $(PUSH),$(RELEASE_PUSH))
-
-release-dry-run:
-	$(RELEASE_CMD) $(RELEASE_DRY)
-
 # ── Archetype scaffolding ────────────────────────────────────────────
 # Usage: make init-<archetype> PROJECT=<name>
-#   e.g. make init-shared PROJECT=my_app
-#   Copies skeleton files from archetypes/skeletons/<archetype>/ into
-#   include/, src/, tests/ and renames them to $PROJECT.
-#   Existing project files are never overwritten.
+#   Copies examples/<archetype>/ → current directory
+#   Replaces __PROJECT__ / __PROJECT_NAME__ / __PROJECT_UPPER__ /
+#   __ProjectCamel__ / __MODULE_NAME__ placeholders
 
 init-list:
 	@echo "Available archetypes:"
 	@for a in header_only static shared plugin module cli gui service kernel; do echo "  $$a"; done
 	@echo ""
 	@echo "Usage: make init-<archetype> PROJECT=<name>"
-	@echo "  e.g. make init-shared PROJECT=my_app"
+	@echo "  e.g. make init-static PROJECT=my_app"
 
 init: init-list
 
@@ -100,8 +75,30 @@ init-header_only init-static init-shared init-plugin init-module init-cli init-g
 	fi
 	@ARCHETYPE="$@"; \
 	ARCHETYPE="$${ARCHETYPE#init-}"; \
-	if [ "$(OS)" = "Windows_NT" ]; then \
-	    powershell -NoProfile -ExecutionPolicy Bypass -File scripts/init-archetype.ps1 -Archetype "$$ARCHETYPE" -Project "$(PROJECT)"; \
-	else \
-	    bash scripts/init-archetype.sh "$$ARCHETYPE" "$(PROJECT)"; \
-	fi
+	PROJ_LOWER="$(echo "$(PROJECT)" | tr '[:upper:]' '[:lower:]' | tr '-' '_')"; \
+	PROJ_UPPER="$(echo "$(PROJECT)" | tr '[:lower:]' '[:upper:]' | tr '-' '_')"; \
+	PROJ_CAMEL="$(echo "$(PROJECT)" | sed -E 's/(^|-)([a-z])/\U\2/g')"; \
+	echo "==> Archetype : $$ARCHETYPE"; \
+	echo "==> Project   : $(PROJECT) ($$PROJ_LOWER / $$PROJ_UPPER / $$PROJ_CAMEL)"; \
+	echo ""; \
+	echo "==> Copying examples/$$ARCHETYPE/ to current directory..."; \
+	cp -r examples/$$ARCHETYPE/. .; \
+	echo "==> Replacing __PROJECT__ placeholders..."; \
+	find . -name '*.hpp' -o -name '*.cpp' -o -name '*.h' -o -name '*.cppm' -o -name '*.c' -o -name '*.txt' -o -name '*.in' -o -name '*.bat' -o -name '*.service' -o -name '*.desktop' -o -name '*.plist' -o -name '*.swift' -o -name '*.rc' -o -name 'Kbuild' -o -name '*.svg' | \
+	    while read -r f; do \
+	        sed -i \
+	            -e "s|__PROJECT__|$$PROJ_LOWER|g" \
+	            -e "s|__PROJECT_NAME__|$$PROJ_LOWER|g" \
+	            -e "s|__PROJECT_UPPER__|$$PROJ_UPPER|g" \
+	            -e "s|__ProjectCamel__|$$PROJ_CAMEL|g" \
+	            -e "s|__MODULE_NAME__|$$PROJ_LOWER|g" \
+	            "$$f"; \
+	    done; \
+	echo "==> Copying Makefile..."; \
+	PROJ_UPPER_MK="$(echo "$(PROJECT)" | tr '[:lower:]' '[:upper:]' | tr '-' '_')"; \
+	sed "s|__PROJECT_UPPER__|$$PROJ_UPPER_MK|g" examples/_Makefile > Makefile; \
+	rm examples/_Makefile; \
+	echo "==> Done."; \
+	echo ""; \
+	echo "Structure:"; \
+	find . -not -path './.git/*' -not -path './examples/*' -not -path './build/*' -not -path './.github/*' -not -path './archetypes/*' -not -name 'Makefile' -not -name 'VERSION' -not -name '.gitignore' -not -name '.clang-*' -not -name '.editorconfig' -not -name '.gitattributes' -not -name 'CHANGELOG*' -not -name 'CLAUDE*' -not -name 'LICENSE' -not -name 'NC_PREFIX' -not -name 'README*' | sort

@@ -1,9 +1,0 @@
-#include <catch2/catch_test_macros.hpp>
-
-// Import the C++20 module instead of including a header
-import ModuleCard;
-
-TEST_CASE("ModuleCard::greet returns formatted message", "[module][greet]") {
-    using namespace aw::module_card;
-    REQUIRE(ModuleCard::greet("World") == "Hello from C++20 module");
-}

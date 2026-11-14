@@ -1,8 +1,5 @@
 # ⚡ aw::template_cpp
 
-[![C++20](https://img.shields.io/badge/C++-%2300599C.svg?logo=c%2B%2B&logoColor=white)](https://cppreference.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 > **A production-grade C++20 project template.**
 > Pick one of 9 ready-made archetypes and start coding in minutes.
 
@@ -59,7 +56,7 @@ git push -u origin main
 
 ### Step 2: Pick an archetype
 
-The fastest way — one command scaffolds everything:
+One command scaffolds your entire project:
 
 ```sh
 make init-<archetype> PROJECT=<name>
@@ -78,37 +75,21 @@ make init-<archetype> PROJECT=<name>
 | `make init-service PROJECT=my_svc` | Scaffold a system service / daemon |
 | `make init-kernel PROJECT=my_drv` | Scaffold a kernel driver |
 
-This copies skeleton files from `archetypes/skeletons/<archetype>/` into `src/`, `include/`, `tests/` and renames them to your project name. **Existing files are never overwritten.**
-
-Alternatively, edit `CMakeLists.txt` manually:
-
-Here are the helpers:
-
-| Archetype | CMake call | Skeletons directory |
-|-----------|-----------|---------------------|
-| Header-only | `aw_add_header_only_library(TARGET my_lib HEADERS include/aw/my_lib/my_lib.hpp)` | `skeletons/header_only/` |
-| Static library | `aw_add_static_library(TARGET my_lib SOURCES src/my_lib.cpp HEADERS include/aw/my_lib/my_lib.hpp)` | `skeletons/static/` |
-| Shared library | `aw_add_shared_library(TARGET my_lib SOURCES src/my_lib.cpp HEADERS include/aw/my_lib/my_lib.hpp)` | `skeletons/shared/` |
-| Plugin module | `aw_add_plugin_module(TARGET my_plugin SOURCES src/my_plugin.cpp)` | `skeletons/plugin/` |
-| C++20 module | `aw_add_cxx_module_library(TARGET my_mod MODULES src/my_mod.cppm HEADERS include/aw/my_mod/my_mod.hin)` | `skeletons/module/` |
-| CLI executable | `aw_add_executable(TARGET my_cli SOURCES src/main.cpp)` | `skeletons/cli/` |
-| GUI executable | `aw_add_gui_executable(TARGET my_gui SOURCES src/main.cpp)` | `skeletons/gui/` |
-| System service | `aw_add_service_executable(TARGET my_svc SOURCES src/service.cpp)` | `skeletons/service/` |
-| Kernel driver | `aw_add_kernel_driver(TARGET my_drv SOURCES src/driver.c PLATFORM linux)` | `skeletons/kernel/` |
+This copies a complete project structure from `examples/<archetype>/` into your directory, replaces all placeholder names with your project name, and generates a `Makefile`. **Existing files are never overwritten.**
 
 ### Step 3: Build and test
 
 ```sh
 # Build
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
+make build
 
 # Run tests
-ctest --test-dir build --output-on-failure
-
-# Or use the Makefile
-make build
 make test
+
+# Or with CMake directly
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
 ```
 
 **That's it.** Your project builds and tests pass.
@@ -119,16 +100,15 @@ make test
 
 ```
 archetypes/          ← CMake helpers (aw_add_* functions) — don't edit
-skeletons/           ← Starter templates — copy into your project
 cmake/               ← Shared build infrastructure — don't edit
 docs/                ← Coding conventions (.clang-format, etc.)
-include/             ← Your public headers
-src/                 ← Your implementation (.cpp files)
-tests/               ← Your unit tests
-examples/            ← Example applications
+examples/            ← Archetype templates (full project structures)
+tools/               ← Utility scripts
 ```
 
-**The rule:** `archetypes/` and `cmake/` are **template-owned** — you update them by pulling from the template repo. Everything else (`include/`, `src/`, `tests/`, `examples/`) is **project-owned** — you edit these freely.
+Each directory under `examples/<archetype>/` is a **complete project** with `CMakeLists.txt`, `src/`, `include/`, `tests/`, and `examples/`. When you run `make init-<archetype>`, that entire structure is copied to your directory.
+
+The `archetypes/` and `cmake/` directories are **template-owned** — you update them by pulling from the template repo. Everything else is **project-owned** — you edit these freely.
 
 ---
 
@@ -144,7 +124,7 @@ git remote add template https://github.com/ai-warevo/template-cpp.git
 git pull template main
 
 # Rebuild and test
-cmake -B build && cmake --build build && ctest --test-dir build
+make build && make test
 ```
 
 The separation between template-owned (`archetypes/`, `cmake/`) and project-owned (`CMakeLists.txt`, `src/`, `include/`) means your code never conflicts with template updates.
@@ -173,7 +153,6 @@ The separation between template-owned (`archetypes/`, `cmake/`) and project-owne
 | `make lint` | Run clang-tidy |
 | `make format` | Run clang-format |
 | `make clean` | Remove build/ |
-| `make release` | Cut a SemVer release |
 
 ---
 
