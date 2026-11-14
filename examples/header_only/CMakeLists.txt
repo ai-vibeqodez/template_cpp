@@ -11,12 +11,6 @@ set(AW_PROJECT_PREFIX "__PROJECT_UPPER__")
 
 include(cmake/AwProjectDefaults.cmake)
 
-include(archetypes/01_core.cmake)
-include(archetypes/02_shared_plugin.cmake)
-include(archetypes/03_modules.cmake)
-include(archetypes/04_executables.cmake)
-include(archetypes/05_service.cmake)
-include(archetypes/06_kernel.cmake)
 
 # ── Header-only library target ─────────────────────────────────────────
 aw_add_header_only_library(__PROJECT_NAME__

@@ -99,16 +99,14 @@ ctest --test-dir build --output-on-failure
 ## What's in the repo?
 
 ```
-archetypes/          ← CMake helpers (aw_add_* functions) — don't edit
-cmake/               ← Shared build infrastructure — don't edit
 docs/                ← Coding conventions (.clang-format, etc.)
-examples/            ← Archetype templates (full project structures)
+examples/            ← Archetype templates (full project structures + cmake/)
 tools/               ← Utility scripts
 ```
 
-Each directory under `examples/<archetype>/` is a **complete project** with `CMakeLists.txt`, `src/`, `include/`, `tests/`, and `examples/`. When you run `make init-<archetype>`, that entire structure is copied to your directory.
+Each directory under `examples/<archetype>/` is a **complete, self-contained project** with `CMakeLists.txt`, `src/`, `include/`, `tests/`, `examples/`, and `cmake/AwProjectDefaults.cmake`. When you run `make init-<archetype>`, that entire structure is copied to your directory.
 
-The `archetypes/` and `cmake/` directories are **template-owned** — you update them by pulling from the template repo. Everything else is **project-owned** — you edit these freely.
+The `cmake/` directory inside each archetype is **template-owned** — embedded in the template. Everything else is **project-owned** — you edit these freely.
 
 ---
 
@@ -127,7 +125,7 @@ git pull template main
 make build && make test
 ```
 
-The separation between template-owned (`archetypes/`, `cmake/`) and project-owned (`CMakeLists.txt`, `src/`, `include/`) means your code never conflicts with template updates.
+The separation between template-owned (`cmake/` inside examples) and project-owned (`CMakeLists.txt`, `src/`, `include/`) means your code never conflicts with template updates.
 
 ---
 

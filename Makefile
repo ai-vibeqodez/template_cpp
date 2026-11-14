@@ -101,4 +101,4 @@ init-header_only init-static init-shared init-plugin init-module init-cli init-g
 	echo "==> Done."; \
 	echo ""; \
 	echo "Structure:"; \
-	find . -not -path './.git/*' -not -path './examples/*' -not -path './build/*' -not -path './.github/*' -not -path './archetypes/*' -not -name 'Makefile' -not -name 'VERSION' -not -name '.gitignore' -not -name '.clang-*' -not -name '.editorconfig' -not -name '.gitattributes' -not -name 'CHANGELOG*' -not -name 'CLAUDE*' -not -name 'LICENSE' -not -name 'NC_PREFIX' -not -name 'README*' | sort
+	find . -not -path './.git/*' -not -path './examples/*' -not -path './build/*' -not -path './.github/*' -not -path './cmake/*' -not -name 'Makefile' -not -name 'VERSION' -not -name '.gitignore' -not -name '.clang-*' -not -name '.editorconfig' -not -name '.gitattributes' -not -name 'CHANGELOG*' -not -name 'CLAUDE*' -not -name 'LICENSE' -not -name 'NC_PREFIX' -not -name 'README*' | sort
