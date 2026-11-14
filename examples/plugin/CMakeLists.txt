@@ -8,6 +8,7 @@ project(__PROJECT_NAME__ VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 set(AW_PROJECT_PREFIX "__PROJECT_UPPER__")
 
 include(cmake/AwProjectDefaults.cmake)
+include(archetypes/02_shared_plugin.cmake)
 
 
 # ── Plugin module target ───────────────────────────────────────────────

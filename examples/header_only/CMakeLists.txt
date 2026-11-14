@@ -10,6 +10,7 @@ find_package(Threads REQUIRED)
 set(AW_PROJECT_PREFIX "__PROJECT_UPPER__")
 
 include(cmake/AwProjectDefaults.cmake)
+include(archetypes/01_core.cmake)
 
 
 # ── Header-only library target ─────────────────────────────────────────

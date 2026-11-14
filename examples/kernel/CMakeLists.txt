@@ -8,6 +8,7 @@ project(__PROJECT_NAME__ VERSION ${PROJECT_VERSION} LANGUAGES C)
 set(AW_PROJECT_PREFIX "__PROJECT_UPPER__")
 
 include(cmake/AwProjectDefaults.cmake)
+include(archetypes/06_kernel.cmake)
 
 
 # ── Kernel driver target (Linux module) ────────────────────────────────

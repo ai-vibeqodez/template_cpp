@@ -14,6 +14,7 @@ set(AW_PROJECT_PREFIX "__PROJECT_UPPER__")
 
 # Include shared CMake infrastructure
 include(cmake/AwProjectDefaults.cmake)
+include(archetypes/01_core.cmake)
 
 # ── Load archetype helpers ─────────────────────────────────────────────
 

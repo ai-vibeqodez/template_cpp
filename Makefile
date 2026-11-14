@@ -75,14 +75,16 @@ init-header_only init-static init-shared init-plugin init-module init-cli init-g
 	fi
 	@ARCHETYPE="$@"; \
 	ARCHETYPE="$${ARCHETYPE#init-}"; \
-	PROJ_LOWER="$(echo "$(PROJECT)" | tr '[:upper:]' '[:lower:]' | tr '-' '_')"; \
-	PROJ_UPPER="$(echo "$(PROJECT)" | tr '[:lower:]' '[:upper:]' | tr '-' '_')"; \
-	PROJ_CAMEL="$(echo "$(PROJECT)" | sed -E 's/(^|-)([a-z])/\U\2/g')"; \
+	PROJ_LOWER=$$(echo "$(PROJECT)" | tr '[:upper:]' '[:lower:]' | tr '-' '_'); \
+	PROJ_UPPER=$$(echo "$(PROJECT)" | tr '[:lower:]' '[:upper:]' | tr '-' '_'); \
+	PROJ_CAMEL=$$(echo "$(PROJECT)" | sed -E 's/(^|-)([a-z])/\U\2/g'); \
 	echo "==> Archetype : $$ARCHETYPE"; \
 	echo "==> Project   : $(PROJECT) ($$PROJ_LOWER / $$PROJ_UPPER / $$PROJ_CAMEL)"; \
 	echo ""; \
 	echo "==> Copying examples/$$ARCHETYPE/ to current directory..."; \
 	cp -r examples/$$ARCHETYPE/. .; \
+	mkdir -p cmake && cp -r examples/cmake/. cmake/; \
+	mkdir -p archetypes && cp -r examples/archetypes/. archetypes/; \
 	echo "==> Replacing __PROJECT__ placeholders..."; \
 	find . -name '*.hpp' -o -name '*.cpp' -o -name '*.h' -o -name '*.cppm' -o -name '*.c' -o -name '*.txt' -o -name '*.in' -o -name '*.bat' -o -name '*.service' -o -name '*.desktop' -o -name '*.plist' -o -name '*.swift' -o -name '*.rc' -o -name 'Kbuild' -o -name '*.svg' | \
 	    while read -r f; do \
@@ -95,7 +97,7 @@ init-header_only init-static init-shared init-plugin init-module init-cli init-g
 	            "$$f"; \
 	    done; \
 	echo "==> Copying Makefile..."; \
-	PROJ_UPPER_MK="$(echo "$(PROJECT)" | tr '[:lower:]' '[:upper:]' | tr '-' '_')"; \
+	PROJ_UPPER_MK=$$(echo "$(PROJECT)" | tr '[:lower:]' '[:upper:]' | tr '-' '_'); \
 	sed "s|__PROJECT_UPPER__|$$PROJ_UPPER_MK|g" examples/_Makefile > Makefile; \
 	rm examples/_Makefile; \
 	echo "==> Done."; \
