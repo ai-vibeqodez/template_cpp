@@ -80,6 +80,12 @@ jobs:
           bg_color_right: '${{ steps.coverage_parser.outputs.color }}'
           filename: 'coverage.svg'
 
+      - name: Isolate Badge for Deploy
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          mkdir -p badge-upload
+          cp "${{ steps.badge_generator.outputs.badge_path }}" badge-upload/coverage.svg
+
       - name: Deploy Badge to separate branch
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: JamesIves/github-pages-deploy-action@v4

@@ -57,6 +57,13 @@ set(AW_${AW_PROJECT_PREFIX}_CXX_STANDARD 20 CACHE STRING
     "C++ standard version (20 or 23)")
 set_property(CACHE AW_${AW_PROJECT_PREFIX}_CXX_STANDARD PROPERTY STRINGS 20 23)
 
+# Apply the standard globally so every target compiled in this project
+# picks up the correct /std:c++XX flag on MSVC (which requires the
+# explicit compiler flag; compile_features alone is sometimes ignored).
+set(CMAKE_CXX_STANDARD "${AW_${AW_PROJECT_PREFIX}_CXX_STANDARD}")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # ---------------------------------------------------------------------------
 # Warnings-as-errors (off by default; CI / developers turn it on)
 # ---------------------------------------------------------------------------

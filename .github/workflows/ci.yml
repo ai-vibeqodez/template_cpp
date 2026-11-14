@@ -44,13 +44,7 @@ jobs:
         env:
           CC: ${{ matrix.cc }}
           CXX: ${{ matrix.cxx }}
-        run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DAW_TEMPLATE_CPP_BUILD_EXAMPLES=ON \
-            -DAW_TEMPLATE_CPP_BUILD_TESTS=ON \
-            -DAW_TEMPLATE_CPP_WARNINGS_AS_ERRORS=ON \
-            -DCMAKE_INSTALL_PREFIX=install
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DAW_TEMPLATE_CPP_BUILD_EXAMPLES=ON -DAW_TEMPLATE_CPP_BUILD_TESTS=ON -DAW_TEMPLATE_CPP_WARNINGS_AS_ERRORS=ON -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
