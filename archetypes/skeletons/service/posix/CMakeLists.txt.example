@@ -1,0 +1,17 @@
+# =============================================================================
+# Example: how to call aw_add_service_executable() from your project's
+# root CMakeLists.txt for a POSIX/systemd service.
+#
+# Copy this block and adapt the target name, source paths, and optional
+# arguments to your project.
+# =============================================================================
+
+aw_add_service_executable(TARGET my_daemon
+    SOURCES src/my_daemon.cpp
+    SERVICE_NAME "my-daemon"
+    SERVICE_DISPLAY_NAME "My Daemon Service"
+    SERVICE_DESCRIPTION "A long-running daemon process"
+    SERVICE_USER "myapp"
+    SERVICE_GROUP "myapp"
+    LINK_LIBRARIES Threads::Threads
+)

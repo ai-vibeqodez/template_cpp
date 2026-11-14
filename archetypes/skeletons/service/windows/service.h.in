@@ -1,0 +1,24 @@
+#pragma once
+
+/**
+ * @file service.h
+ * @brief Public header for the Windows SCM service.
+ *
+ * Replace "@SERVICE_NAME@" with your service name and update the namespace
+ * accordingly.
+ */
+
+#include <windows.h>
+
+// Service configuration — substituted by CMake configure_file().
+#ifndef SERVICE_NAME_W
+#define SERVICE_NAME_W L"@SERVICE_NAME@"
+#endif
+
+#ifndef SERVICE_DISPLAY_NAME_W
+#define SERVICE_DISPLAY_NAME_W L"@SERVICE_DISPLAY_NAME@"
+#endif
+
+// Forward declarations for the service entry points.
+void service_main(DWORD argc, LPWSTR* argv);
+void service_control_handler(DWORD control);

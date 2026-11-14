@@ -1,0 +1,36 @@
+@echo off
+:: install_service.bat — Install/uninstall the aw::service Windows service
+::
+:: Usage: install_service.bat [install|uninstall|start|stop]
+::
+:: Requires administrative privileges for install/uninstall/start.
+
+set SERVICE_NAME=@SERVICE_NAME@
+set SERVICE_DISPLAY_NAME=@SERVICE_DISPLAY_NAME@
+set SERVICE_PATH=%~dp0@TARGET@.exe
+set SERVICE_DESCRIPTION=@SERVICE_DESCRIPTION@
+
+if "%1"=="install" (
+    echo Installing service "%SERVICE_NAME%" ...
+    sc stop "%SERVICE_NAME%" >nul 2>&1
+    sc delete "%SERVICE_NAME%" >nul 2>&1
+    sc create "%SERVICE_NAME%" binPath= "%SERVICE_PATH%" start= auto
+    sc description "%SERVICE_NAME%" "%SERVICE_DESCRIPTION%"
+    echo Service installed.
+) else if "%1"=="uninstall" (
+    echo Uninstalling service "%SERVICE_NAME%" ...
+    sc stop "%SERVICE_NAME%" >nul 2>&1
+    sc delete "%SERVICE_NAME%"
+    echo Service uninstalled.
+) else if "%1"=="start" (
+    echo Starting service "%SERVICE_NAME%" ...
+    sc start "%SERVICE_NAME%"
+    echo Service started.
+) else if "%1"=="stop" (
+    echo Stopping service "%SERVICE_NAME%" ...
+    sc stop "%SERVICE_NAME%"
+    echo Service stopped.
+) else (
+    echo Usage: %~nx0 [install|uninstall|start|stop]
+    exit /b 1
+)
