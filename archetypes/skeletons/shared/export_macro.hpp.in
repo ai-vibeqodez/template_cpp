@@ -1,0 +1,29 @@
+#pragma once
+
+/**
+ * @file export_macro.hpp
+ * @brief Cross-platform DLL export/import visibility macro.
+ *
+ * When building the shared library, define AW_SHARED_BUILDING (set by
+ * CMake helper).  Consumers automatically receive dllimport on Windows
+ * or visibility("default") on GCC/Clang.
+ *
+ * Internal symbols should use AW_API_LOCAL to reduce the DLL export table.
+ */
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+    #ifdef AW_SHARED_BUILDING
+        #define AW_API __declspec(dllexport)
+    #else
+        #define AW_API __declspec(dllimport)
+    #endif
+    #define AW_API_LOCAL
+#else
+    #if __GNUC__ >= 4
+        #define AW_API __attribute__((visibility("default")))
+        #define AW_API_LOCAL __attribute__((visibility("hidden")))
+    #else
+        #define AW_API
+        #define AW_API_LOCAL
+    #endif
+#endif

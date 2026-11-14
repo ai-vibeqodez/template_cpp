@@ -1,0 +1,16 @@
+# =============================================================================
+# Example: how to call aw_add_shared_library() from your project's
+# root CMakeLists.txt.
+#
+# Copy this block and adapt the target name, source/header paths, and
+# optional arguments to your project.
+# =============================================================================
+
+aw_add_shared_library(TARGET my_shared_lib
+    SOURCES src/my_shared_lib.cpp
+    HEADERS include/aw/my_shared_lib/my_shared_lib.hpp
+                include/aw/my_shared_lib/export_macro.hpp
+    BASE_DIRS include
+    LINK_LIBRARIES Threads::Threads
+    COMPILE_DEFINITIONS MY_SHARED_LIB_VERSION="1.0.0"
+)

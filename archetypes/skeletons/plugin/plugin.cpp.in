@@ -1,0 +1,58 @@
+// plugin.cpp — Plugin module with extern "C" factory entry point
+//
+// This file is a template for plugin modules created with
+// aw_add_plugin_module().  Replace MyPlugin with your concrete
+// plugin class name and update the factory/destroy function names.
+
+#include <aw/plugin/plugin_interface.hpp>
+
+#include <string>
+
+namespace {
+
+/**
+ * @class MyPlugin
+ * @brief Concrete plugin implementation.
+ *
+ * Replace this class with your actual plugin logic.
+ */
+class MyPlugin : public aw::plugin::IPlugin {
+public:
+    [[nodiscard]] std::string_view name() const override {
+        return "my_plugin";
+    }
+
+    [[nodiscard]] std::string_view version() const override {
+        return "0.0.0";
+    }
+
+    void initialize() override {
+        // Plugin initialization.
+    }
+
+    void cleanup() override {
+        // Plugin cleanup.
+    }
+};
+
+} // namespace
+
+extern "C" {
+
+/**
+ * @brief Factory function — called by the host application to create a plugin instance.
+ * @return A pointer to the plugin interface (caller takes ownership).
+ */
+AW_API void* create_plugin() {
+    return new MyPlugin();
+}
+
+/**
+ * @brief Destroy function — called by the host application to release the plugin.
+ * @param[in] plugin Pointer returned by create_plugin().
+ */
+AW_API void destroy_plugin(void* plugin) {
+    delete static_cast<MyPlugin*>(plugin);
+}
+
+} // extern "C"

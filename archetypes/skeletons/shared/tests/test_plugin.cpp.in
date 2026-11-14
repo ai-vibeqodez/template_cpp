@@ -1,0 +1,50 @@
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+
+#include <aw/plugin/plugin_interface.hpp>
+
+#include <string>
+
+using namespace aw::plugin;
+
+// A minimal test plugin that satisfies the IPlugin interface.
+namespace {
+
+class TestPlugin : public IPlugin {
+public:
+    [[nodiscard]] std::string_view name() const override {
+        return "test_plugin";
+    }
+
+    [[nodiscard]] std::string_view version() const override {
+        return "0.0.0";
+    }
+
+    void initialize() override {}
+    void cleanup() override {}
+};
+
+} // namespace
+
+TEST_CASE("IPlugin test plugin returns correct name", "[plugin][interface]") {
+    TestPlugin plugin;
+    REQUIRE(plugin.name() == "test_plugin");
+}
+
+TEST_CASE("IPlugin test plugin returns non-empty version", "[plugin][interface]") {
+    TestPlugin plugin;
+    REQUIRE(!plugin.version().empty());
+}
+
+TEST_CASE("IPlugin initialize and cleanup do not throw", "[plugin][interface]") {
+    TestPlugin plugin;
+    REQUIRE_NOTHROW(plugin.initialize());
+    REQUIRE_NOTHROW(plugin.cleanup());
+}
+
+TEST_CASE("IPlugin virtual destructor is virtual", "[plugin][interface]") {
+    // Verify polymorphic deletion is safe.
+    IPlugin* ptr = new TestPlugin();
+    delete ptr;
+    SUCCEED();
+}

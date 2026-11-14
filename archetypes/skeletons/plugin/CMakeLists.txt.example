@@ -1,0 +1,19 @@
+# =============================================================================
+# Example: how to call aw_add_plugin_module() from your project's
+# root CMakeLists.txt.
+#
+# Copy this block and adapt the target name, source/header paths, and
+# optional arguments to your project.
+#
+# NOTE: Plugins are not installed to system paths — they are deployed
+# alongside the host application.  aw_setup_install() is intentionally
+# NOT called for plugin targets.
+# =============================================================================
+
+aw_add_plugin_module(TARGET my_plugin
+    SOURCES src/my_plugin.cpp
+    HEADERS include/aw/my_plugin/plugin_interface.hpp
+    BASE_DIRS include
+    LINK_LIBRARIES my_shared_lib
+    FACTORY_NAME create_my_plugin
+)
