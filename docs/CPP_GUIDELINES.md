@@ -154,3 +154,74 @@ cmake/                         # AwProjectDefaults.cmake
 | `.clang-tidy` | Static analysis | `clang-tidy -p build/dev <file>` |
 | `.editorconfig` | Editor basics | Any editor that reads `.editorconfig` |
 | `compile_commands.json` | clangd / IDE | Set by `CMAKE_EXPORT_COMPILE_COMMANDS=ON` (top-level only) |
+
+## 12. ABI and Visibility Rules
+
+### 12.1 Export Macros
+
+- **Static libraries**: No export macro needed — all symbols are linked directly.
+- **Shared libraries**: Use `AW_API` (from `export_macro.hpp`) for all public symbols. Internal symbols use `AW_API_LOCAL`.
+- **Kernel drivers**: No export macros — kernel drivers are loaded directly into kernel space.
+- **Plugins**: Use `extern "C"` for factory functions to prevent name mangling.
+
+### 12.2 ABI Stability
+
+- **Public headers must be ABI-stable**: Never change the layout of public classes, add/remove virtual functions, or reorder virtual function tables.
+- **Pimpl idiom**: For headers that may change, use the Pimpl pattern (`class Impl;` in header, `std::unique_ptr<Impl>` in class body).
+- **Versioning**: Use `@version` in Doxygen and expose a `version()` function. Track API changes in `CHANGELOG.md`.
+- **No template instantiation in headers**: Template code must be in the header itself (it is its own translation unit). Do not export instantiated templates from a shared library.
+
+### 12.3 Symbol Visibility
+
+- **GCC/Clang**: Compile shared libraries with `-fvisibility=hidden` and mark only public symbols with `AW_API`.
+- **MSVC**: Use `__declspec(dllexport)` / `__declspec(dllimport)` via `AW_API`. The build system defines `AW_SHARED_BUILDING` when building the shared library.
+- **Export table size**: Keep the export table small — only export what is necessary. Large export tables increase load time and DLL bloat.
+
+## 13. Kernel-Mode Constraints
+
+### 13.1 General Rules
+
+- **No user-space CRT**: Kernel drivers cannot use `malloc`, `free`, `new`, `delete`, `printf`, `cout`, or any user-space standard library.
+- **No exceptions**: C++ exceptions are not supported in kernel mode. Use `NTSTATUS` (Windows) or `int` return codes (Linux).
+- **No threading primitives**: Use kernel synchronization primitives (`KEVENT`, `KMUTEX`, `spin_lock`, `mutex_lock`).
+- **No dynamic linking**: Kernel drivers are loaded directly into kernel space.
+
+### 13.2 Windows WDK
+
+- Target minimum Windows version via `NTDDI_VERSION` and `_WIN32_WINNT`.
+- Use `WDF` (Windows Driver Framework) for modern drivers.
+- Sign all drivers for Windows 10+: WHQL certification or test signing.
+
+### 13.3 Linux Kernel
+
+- Target minimum kernel version via `LINUX_VERSION_CODE` and `KERNEL_VERSION()`.
+- License must be GPL-compatible (`MODULE_LICENSE("GPL")`).
+- Use `pr_info`, `pr_err`, `dev_info` for logging.
+- Build against a specific kernel source tree.
+
+See `archetypes/skeletons/kernel/README_KERNEL.md` for detailed guidelines.
+
+## 14. C++20 Module Guidelines
+
+### 14.1 Module Units
+
+- **Interface units** (`.hin` / `.cppm` with `export module`): Define the public API.
+- **Implementation units** (`.cppm` with `module`): Contain the implementation.
+- **Header units** (`.h` / `.hpp` imported via `import "header.h";`): C++23 feature for importing traditional headers as modules.
+
+### 14.2 Compiler Support
+
+| Compiler | Version | Support Level |
+|----------|---------|---------------|
+| GCC | 13+ | Partial (TS-based) |
+| Clang | 15+ | Partial (TS-based) |
+| MSVC | 19.37+ | Limited (`/experimental:module`) |
+
+### 14.3 Best Practices
+
+- Prefer modules for performance-critical libraries where the build system supports them.
+- Fall back to traditional headers for maximum compatibility.
+- Document module dependencies: a module that imports another module must declare this in its interface unit.
+- Header units (`import "header.h";`) are a C++23 feature — use `#include` for broader compatibility.
+
+See `archetypes/skeletons/module/COMPATIBILITY.md` for detailed compatibility notes.
