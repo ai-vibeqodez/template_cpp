@@ -158,10 +158,17 @@ function(aw_add_static_library TARGET)
 
     # -------------------------------------------------------------------
     # 3. Include directories (BUILD_INTERFACE / INSTALL_INTERFACE)
+    #
+    # Only the public header base directory is exposed — never the project
+    # root, because a stray file named “version” (lowercase) in the root
+    # would shadow the C++20 <version> header when #include "version" is
+    # resolved (quoted lookup scans BUILD_INTERFACE dirs first).
+    # FILE_SET HEADERS already registers the include/ tree; we only need
+    # the base directory itself so that #include <aw/…> resolves.
     # -------------------------------------------------------------------
     target_include_directories(${TARGET}
         PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${ARG_BASE_DIRS}>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
 
