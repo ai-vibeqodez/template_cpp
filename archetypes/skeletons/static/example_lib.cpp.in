@@ -1,0 +1,18 @@
+// aw::example_lib implementation
+#include <aw/example_lib/example_lib.hpp>
+
+#include <sstream>
+
+namespace aw::example_lib {
+
+std::string_view ExampleLib::greet(std::string_view name) {
+    std::ostringstream oss;
+    oss << "Hello, " << name << "!";
+    return oss.str();
+}
+
+std::string_view ExampleLib::version() {
+    return EXAMPLE_LIB_VERSION;
+}
+
+} // namespace aw::example_lib

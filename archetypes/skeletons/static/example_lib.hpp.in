@@ -1,0 +1,36 @@
+#pragma once
+
+/**
+ * @file example_lib.hpp
+ * @brief Public API for the static library.
+ *
+ * Replace "example_lib" with your library name and update the namespace
+ * accordingly.  If you later switch to a SHARED library, add the
+ * AW_API macro (see Task 03) around exported symbols.
+ */
+
+#include <string_view>
+
+namespace aw::example_lib {
+
+/**
+ * @class ExampleLib
+ * @brief A static library utility class.
+ */
+class [[nodiscard]] ExampleLib {
+public:
+    /**
+     * @brief Returns a greeting string.
+     * @param[in] name The name to greet.
+     * @return A greeting message.
+     */
+    [[nodiscard]] static std::string_view greet(std::string_view name);
+
+    /**
+     * @brief Returns the library version string.
+     * @return Version in "X.Y.Z" format.
+     */
+    [[nodiscard]] static std::string_view version();
+};
+
+} // namespace aw::example_lib

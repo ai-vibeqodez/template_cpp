@@ -1,0 +1,33 @@
+#pragma once
+
+/**
+ * @file example.hpp
+ * @brief Brief one-line description.
+ *
+ * This header is the public API for the header-only library.
+ * Replace "example" with your library name and update the namespace
+ * accordingly.
+ */
+
+#include <string_view>
+
+namespace aw::example {
+
+/**
+ * @class Example
+ * @brief A header-only utility class.
+ *
+ * All implementation lives in the header (inline functions or
+ * template definitions).  No corresponding .cpp file is needed.
+ */
+class [[nodiscard]] Example {
+public:
+    /**
+     * @brief Returns a greeting string.
+     * @param[in] name The name to greet.
+     * @return A greeting message.
+     */
+    [[nodiscard]] static std::string_view greet(std::string_view name);
+};
+
+} // namespace aw::example

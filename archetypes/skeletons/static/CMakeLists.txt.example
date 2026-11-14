@@ -1,0 +1,15 @@
+# =============================================================================
+# Example: how to call aw_add_static_library() from your project's
+# root CMakeLists.txt.
+#
+# Copy this block and adapt the target name, source/header paths, and
+# optional arguments to your project.
+# =============================================================================
+
+aw_add_static_library(TARGET my_lib
+    SOURCES src/my_lib.cpp
+    HEADERS include/aw/my_lib/my_lib.hpp
+    BASE_DIRS include
+    LINK_LIBRARIES Threads::Threads
+    COMPILE_DEFINITIONS MY_LIB_VERSION="1.0.0"
+)
