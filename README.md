@@ -99,9 +99,9 @@ ctest --test-dir build --output-on-failure
 ## What's in the repo?
 
 ```
-docs/                ← Coding conventions (.clang-format, etc.)
+docs/                ← Coding conventions (.clang-format, .clang-tidy, etc.)
 examples/            ← Archetype templates + shared cmake/ infrastructure
-tools/               ← Utility scripts
+scripts/             ← Utility scripts (release automation)
 ```
 
 Each directory under `examples/<archetype>/` is a **complete, self-contained project** with `CMakeLists.txt`, `src/`, `include/`, `tests/`, and `examples/`. When you run `make init-<archetype>`, that entire structure plus the shared `cmake/AwProjectDefaults.cmake` from `examples/cmake/` is copied to your directory.

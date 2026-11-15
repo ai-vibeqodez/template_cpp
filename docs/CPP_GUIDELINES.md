@@ -129,8 +129,6 @@ src/<project>/                 # .cpp files mirroring header tree
 tests/                         # Catch2 test sources
 examples/                      # 01_*.cpp, 02_*.cpp …
 docs/                          # project-specific docs
-tools/                         # (empty placeholder)
-todo/                          # (empty placeholder)
 cmake/                         # AwProjectDefaults.cmake
 ```
 
@@ -199,7 +197,7 @@ cmake/                         # AwProjectDefaults.cmake
 - Use `pr_info`, `pr_err`, `dev_info` for logging.
 - Build against a specific kernel source tree.
 
-See `archetypes/skeletons/kernel/README_KERNEL.md` for detailed guidelines.
+See `examples/archetypes/skeletons/kernel/linux/` for kernel driver source examples.
 
 ## 14. C++20 Module Guidelines
 
@@ -224,4 +222,4 @@ See `archetypes/skeletons/kernel/README_KERNEL.md` for detailed guidelines.
 - Document module dependencies: a module that imports another module must declare this in its interface unit.
 - Header units (`import "header.h";`) are a C++23 feature — use `#include` for broader compatibility.
 
-See `archetypes/skeletons/module/COMPATIBILITY.md` for detailed compatibility notes.
+See `examples/archetypes/skeletons/` for module skeleton examples and compatibility notes.
