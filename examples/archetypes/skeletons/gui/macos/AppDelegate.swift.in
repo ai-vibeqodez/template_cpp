@@ -1,0 +1,16 @@
+// aw::__PROJECT_NAME__ — macOS AppDelegate (Swift)
+//
+// Auto-generated from the template-cpp skeleton.
+// This is a minimal placeholder — replace with your own SwiftUI/UIKit logic.
+
+import Cocoa
+import SwiftUI
+
+@main
+struct __PROJECT_NAME__App: App {
+    var body: some Scene {
+        WindowGroup {
+            Text("Hello from __PROJECT_NAME__!")
+        }
+    }
+}

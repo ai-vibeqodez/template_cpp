@@ -1,0 +1,14 @@
+@echo off
+REM aw::__PROJECT_NAME__ — Windows service installer
+REM Auto-generated from the template-cpp skeleton.
+REM Run as Administrator.
+
+set SERVICE_NAME=__SERVICE_NAME__
+set DISPLAY_NAME=__SERVICE_DISPLAY_NAME__
+set DESCRIPTION=__SERVICE_DESCRIPTION__
+set BINARY_PATH=%~dp0__PROJECT_NAME__.exe
+
+echo Installing service "%SERVICE_NAME%" ...
+sc create "%SERVICE_NAME%" binPath= "%BINARY_PATH%" start= demand
+sc description "%SERVICE_NAME%" "%DESCRIPTION%"
+echo Done. Use "net start %SERVICE_NAME%" to start.

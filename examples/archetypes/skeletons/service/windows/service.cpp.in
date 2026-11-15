@@ -1,0 +1,66 @@
+// aw::__PROJECT_NAME__ — Windows service implementation
+//
+// Auto-generated from the template-cpp skeleton.
+
+#include "service.h"
+#include <cstdio>
+
+static SERVICE_STATUS g_service_status{};
+static SERVICE_STATUS_HANDLE g_status_handle{};
+
+void WINAPI aw_service_control_handler(DWORD control) {
+    switch (control) {
+        case SERVICE_CONTROL_STOP:
+        case SERVICE_CONTROL_SHUTDOWN:
+            g_service_status.dwWin32ExitCode = 0;
+            g_service_status.dwCurrentState  = SERVICE_STOPPED;
+            SetServiceStatus(g_status_handle, &g_service_status);
+            break;
+        case SERVICE_CONTROL_PAUSE:
+            g_service_status.dwCurrentState = SERVICE_PAUSED;
+            SetServiceStatus(g_status_handle, &g_service_status);
+            break;
+        case SERVICE_CONTROL_CONTINUE:
+            g_service_status.dwCurrentState = SERVICE_RUNNING;
+            SetServiceStatus(g_status_handle, &g_service_status);
+            break;
+        default:
+            break;
+    }
+}
+
+void WINAPI aw_service_main(DWORD argc, LPTSTR argv[]) {
+    g_status_handle = RegisterServiceCtrlHandler(
+        "__SERVICE_NAME__", aw_service_control_handler);
+    if (!g_status_handle) return;
+
+    g_service_status.dwServiceType        = SERVICE_WIN32_OWN_PROCESS;
+    g_service_status.dwCurrentState       = SERVICE_START_PENDING;
+    g_service_status.dwControlsAccepted   = SERVICE_ACCEPT_STOP
+                                          | SERVICE_ACCEPT_SHUTDOWN
+                                          | SERVICE_ACCEPT_PAUSE_CONTINUE;
+    g_service_status.dwWin32ExitCode      = 0;
+    g_service_status.dwServiceSpecificExitCode = 0;
+    g_service_status.dwCheckPoint         = 0;
+    g_service_status.dwWaitHint           = 0;
+
+    SetServiceStatus(g_status_handle, &g_service_status);
+    g_service_status.dwCurrentState = SERVICE_RUNNING;
+    SetServiceStatus(g_status_handle, &g_service_status);
+
+    // TODO: place your service logic here.
+    // The service runs in this thread until stopped.
+
+    g_service_status.dwCurrentState = SERVICE_STOPPED;
+    SetServiceStatus(g_status_handle, &g_service_status);
+}
+
+BOOL aw_service_register_handler(
+    LPCTSTR service_name,
+    LPSERVICE_MAIN_FUNCTION service_main,
+    DWORD controls_accepted) {
+    (void)service_name;
+    (void)service_main;
+    (void)controls_accepted;
+    return TRUE;
+}

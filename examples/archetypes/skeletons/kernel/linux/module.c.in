@@ -1,0 +1,25 @@
+// aw::__PROJECT_NAME__ — Linux kernel module source
+//
+// Auto-generated from the template-cpp skeleton.
+// This is a minimal module skeleton — replace with your driver logic.
+
+#include <linux/module.h>
+#include <linux/init.h>
+#include <linux/kernel.h>
+
+MODULE_LICENSE("Dual MIT/GPL");
+MODULE_AUTHOR("ai-warevo");
+MODULE_DESCRIPTION("__SERVICE_DESCRIPTION__");
+MODULE_VERSION("__LINUX_VERSION__");
+
+static int __init __MODULE_NAME___init(void) {
+    printk(KERN_INFO "__MODULE_NAME__: module loaded\n");
+    return 0;
+}
+
+static void __exit __MODULE_NAME___exit(void) {
+    printk(KERN_INFO "__MODULE_NAME__: module unloaded\n");
+}
+
+module_init(__MODULE_NAME___init);
+module_exit(__MODULE_NAME___exit);
