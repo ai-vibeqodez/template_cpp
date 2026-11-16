@@ -1,6 +1,6 @@
 # Contributing to aw::template_cpp
 
-Thank you for your interest in contributing to `template-cpp`! This document covers how to contribute and what to expect.
+Thank you for your interest in contributing to `template_cpp`! This document covers how to contribute and what to expect.
 
 ## Code of Conduct
 
@@ -90,7 +90,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 If you generated a project from this template and want to pull upstream updates:
 
 ```sh
-git remote add template https://github.com/ai-warevo/template-cpp.git
+git remote add template https://github.com/ai-warevo/template_cpp.git
 git pull template main
 ```
 
@@ -98,7 +98,7 @@ The separation between template-owned (`examples/cmake/`) and project-owned code
 
 ## Questions?
 
-Open an [issue](https://github.com/ai-warevo/template-cpp/issues).
+Open an [issue](https://github.com/ai-warevo/template_cpp/issues).
 
 ## License
 

@@ -24,6 +24,14 @@ newproj() { # DIRNAME
     cp "$ROOT_DIR/CMakePresets.json" "$WORK/$1/"
     printf '%s' "$WORK/$1"
 }
+
+# Same as newproj but also copies VERSION (needed for CMake VERSION file read).
+newproj_ver() { # DIRNAME
+    mkdir -p "$WORK/$1"
+    cp "$ROOT_DIR/CMakePresets.json" "$WORK/$1/"
+    cp "$ROOT_DIR/VERSION" "$WORK/$1/"
+    printf '%s' "$WORK/$1"
+}
 expect_fail() { # DESCRIPTION CMD...
     local d=$1; shift
     if "$@" >/dev/null 2>&1; then fail "$d (command unexpectedly succeeded)"; fi
@@ -33,9 +41,37 @@ build_and_test() { # DIR TESTS(1|0)
     # Windows CMake can't read MSYS paths such as /tmp/...; cygpath -m (Git Bash) fixes that.
     local d=$1
     if command -v cygpath >/dev/null 2>&1; then d=$(cygpath -m "$d"); fi
-    (cd "$d" && cmake --preset dev >/dev/null && cmake --build --preset dev >/dev/null) || fail "build failed in $1"
+    # CMAKE_BUILD_TYPE is only needed for single-config generators (Ninja, Make).
+    # Multi-config generators (Visual Studio on Windows, Xcode on macOS) ignore it and use
+    # the build preset's "configuration" field instead.  Omit it on MSVC to avoid the CMake
+    # "unused-cli" warning.  On Windows the default generator is Visual Studio (multi-config);
+    # on Linux/macOS it is Ninja/Make (single-config).
+    local extra_args="-DCMAKE_BUILD_TYPE=Debug"
+    case "$(uname -s)" in
+        MINGW*|MSYS*|CYGWIN*|Windows*) extra_args="" ;; # multi-config
+    esac
+    local dirbase
+    dirbase=$(basename "$1")
+    local logfile="$WORK/build-${dirbase}.log"
+    {
+        echo "=== build_and_test: dir=$d extra_args=$extra_args ==="
+        echo "=== cmake version: $(cmake --version | head -1) ==="
+        echo "=== uname: $(uname -s) ==="
+        echo "=== cygpath: $(command -v cygpath 2>/dev/null || echo not found) ==="
+        echo "=== d after cygpath: $d ==="
+    } >>"$logfile" 2>&1
+    (cd "$d" && cmake --preset dev $extra_args >>"$logfile" 2>&1 && cmake --build --preset dev >>"$logfile" 2>&1) || {
+        echo "=== cmake configure/build output ===" >&2
+        cat "$logfile" >&2
+        fail "build failed in $1"
+    }
     if [ "$2" = 1 ]; then
-        (cd "$d" && ctest --preset dev >/dev/null) || fail "tests failed in $1"
+        local tlog="$WORK/test-${dirbase}.log"
+        (cd "$d" && ctest --preset dev >"$tlog" 2>&1) || {
+            echo "=== ctest output ===" >&2
+            cat "$tlog" >&2
+            fail "tests failed in $1"
+        }
     fi
 }
 
@@ -68,7 +104,7 @@ pass "dry run writes nothing"
 
 for t in $TYPES; do
     section "template: $t"
-    d=$(newproj "$t-hyphen")
+    d=$(newproj_ver "$t-hyphen")
     # shellcheck disable=SC2086
     $SCAFFOLD init "$t" --out "$d" --name my-lib --ns aw::foo::bar >/dev/null || fail "init $t failed"
     for p in CMakeLists.txt src include tests; do [ -e "$d/$p" ] || fail "$t: missing $p"; done
@@ -88,7 +124,7 @@ for t in $TYPES; do
     pass "$t: re-init overwrites with warning; --no-tests builds"
 
     # Name inferred from the directory, default namespace.
-    d=$(newproj "infer-$t/Inferred.Dir")
+    d=$(newproj_ver "infer-$t/Inferred.Dir")
     # shellcheck disable=SC2086
     $SCAFFOLD init "$t" --out "$d" >/dev/null || fail "$t: init with inferred name failed"
     [ -f "$d/include/aw/unnamed/inferred_dir.hpp" ] || fail "$t: NAME inference / default NS failed"

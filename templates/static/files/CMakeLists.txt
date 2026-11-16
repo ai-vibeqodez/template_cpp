@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
-project(@@NAME@@ VERSION 0.1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
+include(cmake/ProjectConfig)
+aw_project_config(NAME @@NAME@@ NS @@NS@@)
+project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
+
+# Compiler warnings (must come after project() so CMAKE_CXX_COMPILER_ID is known).
 if(MSVC)
     set(AW_WARNINGS /W4)
 else()
@@ -19,9 +20,5 @@ target_compile_features(@@NAME@@ PUBLIC cxx_std_20)
 target_compile_options(@@NAME@@ PRIVATE ${AW_WARNINGS})
 
 # Tests exist only if the project was generated with tests (the tests/ directory is optional).
-if(PROJECT_IS_TOP_LEVEL AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
-    include(CTest)
-    if(BUILD_TESTING)
-        add_subdirectory(tests)
-    endif()
-endif()
+include(cmake/Tests)
+aw_setup_tests()

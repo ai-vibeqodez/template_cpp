@@ -8,12 +8,24 @@
 #
 #   make build | test | lint | format | clean      (BUILD_TYPE=Debug|Release, default Debug)
 #
+#   make release [PUSH=1]        cut a SemVer release from CHANGELOG.md
+#   make release-dry-run         preview the next version without changing anything
+#   make changelog [FORCE=1]     update [Unreleased] from git log (conventional commits)
+#   make changelog-dry-run       preview changelog update
+#
 # Examples:
 #   make init TYPE=static NAME=my-lib NS=aw::foo
 #   make init TYPE=cli                      # NAME inferred from this directory's name, NS=aw::unnamed
 #   make init TYPE=lib TESTS=0              # alias for static, without tests/ and Catch2
 #
 # Values reach scaffold.sh through the environment (AW_*), so no shell quoting is needed for NS=aw::foo etc.
+
+IS_POSIX := 1
+ifneq ($(OS),Windows_NT)
+IS_POSIX := 1
+else
+IS_POSIX := 0
+endif
 
 SCAFFOLD := bash templates/scaffold.sh
 PRESET   := $(if $(filter Release,$(BUILD_TYPE)),release,dev)
@@ -36,7 +48,7 @@ export AW_DRY := $(DRY)
 endif
 
 .DEFAULT_GOAL := help
-.PHONY: help list init selftest eject build test lint format clean
+.PHONY: help list init selftest eject build test lint format clean release release-dry-run changelog changelog-dry-run
 
 help:
 	@echo "aw::template_cpp — C++20 project generator"
@@ -58,6 +70,31 @@ list init selftest:
 
 eject:
 	@$(SCAFFOLD) eject
+
+# ── release & changelog ──────────────────────────────────────────────
+release:
+	@case "$(IS_POSIX)" in \
+	  1) bash scripts/release.sh $(if $(PUSH),--push) ;; \
+	  *) powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 $(if $(PUSH),-Push) ;; \
+	esac
+
+release-dry-run:
+	@case "$(IS_POSIX)" in \
+	  1) bash scripts/release.sh --dry-run ;; \
+	  *) powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 -DryRun ;; \
+	esac
+
+changelog:
+	@case "$(IS_POSIX)" in \
+	  1) bash scripts/changelog-update.sh $(if $(FORCE),--force) ;; \
+	  *) powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 $(if $(FORCE),-Force) ;; \
+	esac
+
+changelog-dry-run:
+	@case "$(IS_POSIX)" in \
+	  1) bash scripts/changelog-update.sh --dry-run ;; \
+	  *) powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 -DryRun ;; \
+	esac
 
 # ── project targets ──────────────────────────────────────────────────
 build:
