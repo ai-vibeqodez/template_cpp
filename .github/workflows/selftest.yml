@@ -1,13 +1,18 @@
 name: selftest
 
 on:
+  workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
+  lint-scripts:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +32,6 @@ jobs:
         run: |
           list=$(bash templates/scaffold.sh list | sed -n 's/^  \([^ ]*\) .*/"\1"/p' | paste -sd, -)
           echo "templates=[$list]" >> "$GITHUB_OUTPUT"
-          echo "Discovered: [$list]"
 
   selftest:
     name: ${{ matrix.template }} — ${{ matrix.env.name }}
@@ -77,9 +81,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup MSVC environment (Windows)
+      - name: Setup MSVC environment
         if: matrix.env.os == 'windows-latest' && (matrix.env.cc == 'cl' || matrix.env.cc == 'clang-cl')
         uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup MinGW PATH
+        if: matrix.env.name == 'Windows MinGW GCC'
+        shell: bash
+        run: echo "/c/msys64/mingw64/bin" >> "$GITHUB_PATH"
 
       - name: Run selftest (${{ matrix.template }} / ${{ matrix.env.name }})
         shell: bash
@@ -88,3 +97,57 @@ jobs:
           CXX: ${{ matrix.env.cxx }}
           CMAKE_GENERATOR: ${{ matrix.env.generator }}
         run: bash templates/selftest.sh "${{ matrix.template }}"
+
+  quality-and-sanitizers:
+    name: Quality & Sanitizers — ${{ matrix.template }}
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: ${{ fromJSON(needs.discover.outputs.templates) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scaffold ${{ matrix.template }} into workspace
+        shell: bash
+        run: bash templates/scaffold.sh init "${{ matrix.template }}" --name ci_check --ns aw::ci
+
+      - name: Check clang-format
+        uses: ai-warevo/.github/ci/actions/clang-format@main
+        with:
+          source_dir: .
+          extensions: cpp,hpp
+
+      - name: Build with ASan + UBSan & export compile_commands.json
+        shell: bash
+        run: |
+          cmake -B build-asan -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined"
+          cmake --build build-asan --parallel
+
+      - name: Run clang-tidy
+        uses: ai-warevo/.github/ci/actions/clang-tidy@main
+        with:
+          source_dir: .
+          build_dir: build-asan
+
+      - name: Run CTest (ASan + UBSan)
+        shell: bash
+        run: ctest --test-dir build-asan --output-on-failure --timeout 120
+
+      - name: Build & Test with TSan
+        shell: bash
+        run: |
+          sudo sysctl vm.mmap_rnd_bits=28
+          cmake -B build-tsan -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_CXX_FLAGS="-fsanitize=thread" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=thread"
+          cmake --build build-tsan --parallel
+          ctest --test-dir build-tsan --output-on-failure --timeout 120
