@@ -50,9 +50,19 @@ build_and_test() { # DIR TESTS(1|0)
     case "$(uname -s)" in
         MINGW*|MSYS*|CYGWIN*|Windows*) extra_args="" ;; # multi-config
     esac
-    (cd "$d" && cmake --preset dev $extra_args >/dev/null && cmake --build --preset dev >/dev/null) || fail "build failed in $1"
+    local logfile="$WORK/build-$1.log"
+    (cd "$d" && cmake --preset dev $extra_args >"$logfile" 2>&1 && cmake --build --preset dev >>"$logfile" 2>&1) || {
+        echo "=== cmake configure/build output ===" >&2
+        cat "$logfile" >&2
+        fail "build failed in $1"
+    }
     if [ "$2" = 1 ]; then
-        (cd "$d" && ctest --preset dev >/dev/null) || fail "tests failed in $1"
+        local tlog="$WORK/test-$1.log"
+        (cd "$d" && ctest --preset dev >"$tlog" 2>&1) || {
+            echo "=== ctest output ===" >&2
+            cat "$tlog" >&2
+            fail "tests failed in $1"
+        }
     fi
 }
 
