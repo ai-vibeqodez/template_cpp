@@ -1,9 +1,0 @@
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=__APP_NAME__
-Comment=An aw::template_cpp GUI application
-Exec=__EXECUTABLE_NAME__ %U
-Icon=__PROJECT_NAME__
-Terminal=false
-Categories=Utility;

@@ -79,7 +79,7 @@ make init-<archetype> PROJECT=<name>
 | `make init-service PROJECT=my_svc` | Scaffold a system service / daemon |
 | `make init-kernel PROJECT=my_drv` | Scaffold a kernel driver |
 
-This copies a complete project structure from `examples/<archetype>/` into your directory, replaces all placeholder names with your project name, and generates a `Makefile`. **Existing files are never overwritten.**
+This copies a complete project structure from `templates/<archetype>/` into your directory, replaces all placeholder names with your project name, and generates a `Makefile`. **Existing files are never overwritten.**
 
 ### Step 3: Build and test
 
@@ -103,14 +103,9 @@ ctest --test-dir build --output-on-failure
 ## What's in the repo?
 
 ```
-docs/                ← Coding conventions (.clang-format, .clang-tidy, etc.)
-examples/            ← Archetype templates + shared cmake/ infrastructure
-scripts/             ← Utility scripts (release automation)
+... TODO: // fixme
+scripts/               ← Utility scripts (release automation)
 ```
-
-Each directory under `examples/<archetype>/` is a **complete, self-contained project** with `CMakeLists.txt`, `src/`, `include/`, `tests/`, and `examples/`. When you run `make init-<archetype>`, that entire structure plus the shared `cmake/AwProjectDefaults.cmake` from `examples/cmake/` is copied to your directory.
-
-The `cmake/` directory (one shared file) is **template-owned** — embedded in `examples/cmake/`. Everything else is **project-owned** — you edit these freely.
 
 ---
 
@@ -129,7 +124,7 @@ git pull template main
 make build && make test
 ```
 
-The separation between template-owned (`cmake/AwProjectDefaults.cmake` in `examples/cmake/`) and project-owned (`CMakeLists.txt`, `src/`, `include/`) means your code never conflicts with template updates.
+The separation between template-owned (`cmake/`, `archetypes/`) and project-owned (`CMakeLists.txt`, `src/`, `include/`) means your code never conflicts with template updates.
 
 ---
 

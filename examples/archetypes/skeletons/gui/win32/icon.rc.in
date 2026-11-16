@@ -1,8 +1,0 @@
-// aw::__PROJECT_NAME__ — Win32 icon resource script
-//
-// Auto-generated from the template-cpp skeleton.
-// Replace icon.ico with your own 256×256 .ico file.
-
-#include "resource.h"
-
-IDI_ICON ICON DISCARDABLE "icon.ico"
