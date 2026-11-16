@@ -1,7 +1,12 @@
 # Opt-in tool for local use (not run in CI). Needs compile_commands.json: configure with CMake first.
 #   clang-tidy -p build/dev <file>
+#
+# Approach: * (all checks) minus exclusions — similar to nlohmann/json.
+# This catches new bugs automatically as LLVM adds new checks.
+
 Checks: >
   -*,
+  *,
   bugprone-*,
   cppcoreguidelines-avoid-capturing-lambda-coroutines,
   cppcoreguidelines-avoid-reference-coroutine-parameters,
@@ -16,6 +21,7 @@ Checks: >
   performance-*,
   readability-container-size-empty,
   readability-redundant-member-init,
+  # --- Exclusions ---
   -bugprone-easily-swappable-parameters,
   -bugprone-exception-escape,
   -bugprone-unchecked-optional-access
