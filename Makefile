@@ -20,12 +20,9 @@
 #
 # Values reach scaffold.sh through the environment (AW_*), so no shell quoting is needed for NS=aw::foo etc.
 
-IS_POSIX := 1
-ifneq ($(OS),Windows_NT)
-IS_POSIX := 1
-else
-IS_POSIX := 0
-endif
+# Detect POSIX shell: MSYS2/MinGW/Cygwin/WSL all have /usr/bin/sh.
+# Only pure Windows (no MSYSTEM, no CYGWIN, no WSL) falls back to PowerShell.
+IS_POSIX := $(strip $(if $(MSYSTEM)$(CYGWIN)$(findstring WSL,$(SHELL)),1,))
 
 SCAFFOLD := bash templates/scaffold.sh
 PRESET   := $(if $(filter Release,$(BUILD_TYPE)),release,dev)
@@ -72,29 +69,39 @@ eject:
 	@$(SCAFFOLD) eject
 
 # ── release & changelog ──────────────────────────────────────────────
+# Cut a SemVer release from CHANGELOG.md.
+# to push:
+#   make release PUSH=1
 release:
-	@case "$(IS_POSIX)" in \
-	  1) bash scripts/release.sh $(if $(PUSH),--push) ;; \
-	  *) powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 $(if $(PUSH),-Push) ;; \
-	esac
+ifeq ($(IS_POSIX),1)
+	sh scripts/release.sh $(if $(PUSH),--push)
+else
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 $(if $(PUSH),-Push)
+endif
 
 release-dry-run:
-	@case "$(IS_POSIX)" in \
-	  1) bash scripts/release.sh --dry-run ;; \
-	  *) powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 -DryRun ;; \
-	esac
+ifeq ($(IS_POSIX),1)
+	sh scripts/release.sh --dry-run
+else
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 -DryRun
+endif
 
+# Generate [Unreleased] section in CHANGELOG.md from git log (conventional commits).
+# `make changelog` updates in place;
+# `make changelog FORCE=1` overwrites existing [Unreleased].
 changelog:
-	@case "$(IS_POSIX)" in \
-	  1) bash scripts/changelog-update.sh $(if $(FORCE),--force) ;; \
-	  *) powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 $(if $(FORCE),-Force) ;; \
-	esac
+ifeq ($(IS_POSIX),1)
+	sh scripts/changelog-update.sh $(if $(FORCE),--force)
+else
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 $(if $(FORCE),-Force)
+endif
 
 changelog-dry-run:
-	@case "$(IS_POSIX)" in \
-	  1) bash scripts/changelog-update.sh --dry-run ;; \
-	  *) powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 -DryRun ;; \
-	esac
+ifeq ($(IS_POSIX),1)
+	sh scripts/changelog-update.sh --dry-run
+else
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 -DryRun
+endif
 
 # ── project targets ──────────────────────────────────────────────────
 build:

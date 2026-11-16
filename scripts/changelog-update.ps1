@@ -36,14 +36,14 @@ function Get-GitOutput {
     return $out
 }
 
-$root = (Get-GitOutput rev-parse --show-toplevel | Select-Object -First 1)
+$root = (& git rev-parse --show-toplevel).Trim()
 Set-Location $root
 
 $changelog = 'CHANGELOG.md'
 if (-not (Test-Path -LiteralPath $changelog)) { Fail "$changelog not found" }
 
 # Determine the previous tag.
-$prevTag = (Get-GitOutput tag -l 'v*' --sort=-version:refname | Select-Object -First 1)
+$prevTag = (& git tag -l 'v*' --sort=-version:refname)[0]
 if ($prevTag) {
     $range = "$prevTag..HEAD"
 } else {
@@ -51,7 +51,7 @@ if ($prevTag) {
 }
 
 # Collect commit subjects.
-$commits = Get-GitOutput log --pretty=format:'%s' $range
+$commits = (& git log --pretty=format:'%s' $range) -split "`n" | Where-Object { $_ }
 if (-not $commits) { Write-Host "No commits found in $range"; exit 0 }
 
 # Skip keywords for infra-only ci/chore commits.
@@ -72,14 +72,15 @@ function Clean-Entry([string]$subject) {
     return $subject -replace '^[a-z]+\([^)]*\): *', '' -replace '^[a-z]+: *', ''
 }
 
-# Categories as ordered dictionary.
-$categories = [ordered]@{
-    breaking = [System.Collections.Generic.List[string]]::new()
-    feature  = [System.Collections.Generic.List[string]]::new()
-    fix      = [System.Collections.Generic.List[string]]::new()
-    change   = [System.Collections.Generic.List[string]]::new()
-    remove   = [System.Collections.Generic.List[string]]::new()
+# Categories as ordered hashtable of arrays.
+$categories = @{
+    breaking = @()
+    feature  = @()
+    fix      = @()
+    change   = @()
+    remove   = @()
 }
+$catOrder = @('breaking', 'feature', 'fix', 'change', 'remove')
 
 foreach ($line in $commits) {
     if (-not $line) { continue }
@@ -110,10 +111,11 @@ foreach ($line in $commits) {
     elseif ($cleanLine -match '^test(\(|:)') { $category = 'fix' }
     elseif ($cleanLine -match '^revert(\(|:)') { $category = 'remove' }
 
+    $entry = Clean-Entry $cleanLine
     if ($isBreaking) {
-        $categories.breaking.Add((Clean-Entry $cleanLine))
+        $categories.breaking += $entry
     } else {
-        $categories[$category].Add((Clean-Entry $cleanLine))
+        $categories[$category] += $entry
     }
 }
 
@@ -124,9 +126,9 @@ if ($DryRun) {
         breaking = 'Breaking'; feature = 'Added'; fix = 'Fixed'
         change = 'Changed'; remove = 'Removed'
     }
-    foreach ($key in $categories.Keys) {
+    foreach ($key in $catOrder) {
         $entries = $categories[$key]
-        if ($entries.Count -eq 0) { continue }
+        if (-not $entries -or $entries.Count -eq 0) { continue }
         Write-Host ""
         Write-Host "### $($catDisplay[$key])"
         Write-Host ""
@@ -142,22 +144,21 @@ if ($hasUnreleased -and -not $Force) {
 }
 
 # Build the [Unreleased] section content.
-$sectionLines = [System.Collections.Generic[List[string]]]::new()
-$sectionLines.Add('## [Unreleased]')
+$sectionLines = @('## [Unreleased]')
 
 $catDisplay = @{
     breaking = 'Breaking'; feature = 'Added'; fix = 'Fixed'
     change = 'Changed'; remove = 'Removed'
 }
 
-foreach ($key in $categories.Keys) {
+foreach ($key in $catOrder) {
     $entries = $categories[$key]
-    if ($entries.Count -eq 0) { continue }
+    if (-not $entries -or $entries.Count -eq 0) { continue }
 
-    $sectionLines.Add('')
-    $sectionLines.Add("### $($catDisplay[$key])")
-    $sectionLines.Add('')
-    foreach ($e in $entries) { $sectionLines.Add("- $e") }
+    $sectionLines += ''
+    $sectionLines += "### $($catDisplay[$key])"
+    $sectionLines += ''
+    foreach ($e in $entries) { $sectionLines += "- $e" }
 }
 
 $sectionContent = ($sectionLines -join "`n") + "`n"
@@ -165,11 +166,10 @@ $sectionContent = ($sectionLines -join "`n") + "`n"
 # Read the changelog.
 $raw = [System.IO.File]::ReadAllText((Join-Path $root $changelog))
 $crlf = $raw.Contains("`r`n")
-$lines = [System.Collections.Generic[List[string]]]::new()
-$lines.AddRange([string[]]($raw -split "\r?\n"))
-if ($lines.Count -gt 0 -and $lines[$lines.Count - 1] -eq '') { $lines.RemoveAt($lines.Count - 1) }
+$lines = @($raw -split "\r?\n")
+if ($lines.Count -gt 0 -and $lines[$lines.Count - 1] -eq '') { $lines = $lines[0..($lines.Count - 2)] }
 
-$result = [System.Collections.Generic[List[string]]]::new()
+$result = @()
 
 if ($hasUnreleased) {
     # Replace existing [Unreleased] section.
@@ -182,18 +182,18 @@ if ($hasUnreleased) {
         for ($i = $startIdx + 1; $i -lt $lines.Count; $i++) {
             if ($lines[$i] -match '^## \[') { $endIdx = $i; break }
         }
-        $result.AddRange($lines.GetRange(0, $startIdx + 1))
-        $result.AddRange(($sectionContent -split "`n"))
-        $result.AddRange($lines.GetRange($endIdx, $lines.Count - $endIdx))
+        $result += $lines[0..($startIdx)]
+        $result += ($sectionContent -split "`n")
+        $result += $lines[$endIdx..($lines.Count - 1)]
     }
 } else {
     # Insert after "# Changelog" header.
     $inserted = $false
     foreach ($line in $lines) {
-        $result.Add($line)
+        $result += $line
         if (-not $inserted -and $line -match '^# Changelog$') {
-            $result.Add('')
-            $result.AddRange(($sectionContent -split "`n"))
+            $result += ''
+            $result += ($sectionContent -split "`n")
             $inserted = $true
         }
     }
@@ -205,5 +205,5 @@ $text = ($result -join $newline) + $newline
 [System.IO.File]::WriteAllText((Join-Path $root $changelog), $text, (New-Object System.Text.UTF8Encoding($false)))
 
 $total = 0
-foreach ($key in $categories.Keys) { $total += $categories[$key].Count }
+foreach ($key in $catOrder) { $total += ($categories[$key]).Count }
 Write-Host "Updated CHANGELOG.md: $total commit(s) added to [Unreleased]."

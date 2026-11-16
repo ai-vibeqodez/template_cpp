@@ -33,7 +33,7 @@ Git for Windows does not ship `make`. Call the script directly instead:
 | `static`  | `lib`, `library`      | Static library with a public header                              |
 | `dynamic` | `dll`, `so`, `shared` | Shared library with generated export macros (`GenerateExportHeader`) |
 
-All templates are C++20 with `CXX_EXTENSIONS OFF`, strict warnings, and Catch2 v3 tests.
+All templates are C++20 (`cxx_std_20`), with `-Wall -Wextra -Wpedantic` (or `/W4` on MSVC) and Catch2 v3 tests.
 
 ## `make init`
 
@@ -79,13 +79,27 @@ make clean
 
 These use [`CMakePresets.json`](CMakePresets.json) (`dev` = Debug, `release`). You can also call `cmake --preset dev` yourself.
 
+### Release & changelog
+
+```sh
+make release [PUSH=1]        # cut a SemVer release from CHANGELOG.md
+make release-dry-run         # preview the next version
+make changelog [FORCE=1]     # update [Unreleased] from git log (conventional commits)
+make changelog-dry-run       # preview changelog update
+```
+
 ## Layout
 
 ```
 Makefile              thin wrapper: help, list, init, selftest, eject, build/test/lint/format/clean
+                      plus release, release-dry-run, changelog, changelog-dry-run
 CMakePresets.json     shared presets (dev, release)
+VERSION               project version
+CHANGELOG.md          user-visible changes
+CONTRIBUTING.md       how to contribute
 .clang-format .clang-tidy .editorconfig .gitignore .gitattributes
-scripts/              project-level scripts only (release.sh, release.ps1) — no generator code
+cmake/                shared CMake modules (ProjectConfig, Tests, CoreLibrary, Library/, Windows/)
+scripts/              project-level scripts (release.sh, release.ps1, changelog-update.sh, changelog-update.ps1)
 templates/
   scaffold.sh         the generator: list | init | eject
   selftest.sh         generates, builds and tests every template
