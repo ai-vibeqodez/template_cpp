@@ -27,7 +27,7 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ### Added
 
-- First release of the `template-cpp` repository.
+- First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template-cpp/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/ai-warevo/template-cpp/releases/tag/v0.1.0
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/ai-warevo/template_cpp/releases/tag/v0.1.0

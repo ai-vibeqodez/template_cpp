@@ -8,7 +8,7 @@
       Added, Deprecated          -> minor
       Fixed, Changed, Security   -> patch
     Then promotes [Unreleased] to "## [X.Y.Z] - <today>", updates the compare links, writes X.Y.Z to VERSION (read by
-    CMakeLists.txt), commits CHANGELOG.md + VERSION as "release vX.Y.Z" and creates the annotated tag vX.Y.Z. Pushing the tag triggers the GitHub release workflow.
+    CMakeLists.txt), commits CHANGELOG.md + VERSION as "chore(release): vX.Y.Z" and creates the annotated tag vX.Y.Z. Pushing the tag triggers the GitHub release workflow.
 
 .PARAMETER Push
     Also push the current branch and the new tag (atomically) to $env:RELEASE_REMOTE (default: origin).
@@ -188,7 +188,7 @@ $text = ($result -join $newline) + $newline
 [System.IO.File]::WriteAllText((Join-Path $root $versionFile), "$version`n", (New-Object System.Text.UTF8Encoding($false)))
 
 Invoke-Git add -- $changelog $versionFile
-Invoke-Git commit -m "release $tag" -- $changelog $versionFile
+Invoke-Git commit -m "chore(release): v$version" -- $changelog $versionFile
 Invoke-Git tag -a $tag -m "release $tag"
 Write-Host "Created commit and annotated tag $tag."
 
