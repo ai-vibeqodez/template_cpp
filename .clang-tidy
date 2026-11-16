@@ -78,5 +78,5 @@ Checks:
   - '-readability-function-cognitive-complexity'
 
 WarningsAsErrors: ''
-HeaderFilterRegex: '.*/include/.*'
+HeaderFilterRegex: '^(include|src)/'
 FormatStyle: file
