@@ -1,21 +1,10 @@
 cmake_minimum_required(VERSION 3.21)
 
-file(READ "${CMAKE_CURRENT_LIST_DIR}/VERSION" @@NAME_UPPER@@_VERSION)
-string(STRIP "${@@NAME_UPPER@@_VERSION}" @@NAME_UPPER@@_VERSION)
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/VERSION")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
-project(@@NAME@@ VERSION ${@@NAME_UPPER@@_VERSION} LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-if(MSVC)
-    set(AW_WARNINGS /W4)
-else()
-    set(AW_WARNINGS -Wall -Wextra -Wpedantic)
-endif()
+include(cmake/ProjectConfig)
+aw_project_config(NAME @@NAME@@ NS @@NS@@)
+project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
 
 add_library(@@NAME@@ STATIC src/@@NAME_ID@@.cpp)
 add_library(@@NS@@::@@NAME@@ ALIAS @@NAME@@)
@@ -24,9 +13,5 @@ target_compile_features(@@NAME@@ PUBLIC cxx_std_20)
 target_compile_options(@@NAME@@ PRIVATE ${AW_WARNINGS})
 
 # Tests exist only if the project was generated with tests (the tests/ directory is optional).
-if(PROJECT_IS_TOP_LEVEL AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
-    include(CTest)
-    if(BUILD_TESTING)
-        add_subdirectory(tests)
-    endif()
-endif()
+include(cmake/Tests)
+aw_setup_tests()

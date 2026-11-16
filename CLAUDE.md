@@ -16,9 +16,11 @@ exist only in a generated project (the template files live under `templates/<typ
 - `templates/selftest.sh`: generates every template, builds it and runs ctest, plus generator checks.
 - `templates/<type>/template.conf`: sourced in a subshell. Only `DESCRIPTION` and `ALIASES` (space-separated) are read.
 - `templates/<type>/files/`: mirrors the project root. Its top-level entries must be in `MANAGED` in `scaffold.sh`
-  (`CMakeLists.txt src include tests cmake`); `init` replaces exactly those on every run.
-- Shared root files (`CMakePresets.json`, `.clang-format`, `.clang-tidy`, `.editorconfig`, `.gitignore`) live in the repo root.
-  There is **no** `templates/_common/`.
+  (`CMakeLists.txt src include tests`); `init` replaces exactly those on every run.
+- `SHARED_FILES` in `scaffold.sh` lists files/dirs copied as-is from the repository root into the generated project:
+  `cmake scripts .clang-format .clang-tidy .editorconfig .gitignore .gitattributes CMakePresets.json VERSION`.
+  These are not rendered (no `@@KEY@@` processing).
+- There is **no** `templates/_common/`.
 - `scripts/` is for project-level scripts only (`release.sh`, `release.ps1`). Never put generator code there.
 
 ### Placeholders

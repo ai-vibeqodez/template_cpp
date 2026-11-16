@@ -18,7 +18,11 @@ TPL_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT_DIR=$(dirname "$TPL_DIR")
 
 # Top-level entries a template may produce. `init` replaces exactly these, so re-running it is idempotent.
-MANAGED="CMakeLists.txt src include tests cmake"
+MANAGED="CMakeLists.txt src include tests"
+
+# Shared files/dirs copied as-is from the repository root into the generated project.
+# Not rendered (no @@KEY@@ processing) — just cp.
+SHARED_FILES="cmake scripts .clang-format .clang-tidy .editorconfig .gitignore .gitattributes CMakePresets.json VERSION"
 KEYS="NAME NAME_ID NAME_UPPER NS NS_OPEN NS_CLOSE NS_PATH NS_UPPER MACRO_PREFIX TYPE"
 LEFTOVER_RE='@@[A-Z0-9_]+@@'
 NAME_RE='^[a-z][a-z0-9_-]*$'
@@ -245,6 +249,17 @@ cmd_init() {
 $files
 EOF
     [ "$count" -gt 0 ] || die "template '$type' generated no files"
+
+    # Copy shared files/dirs from the repository root into the staging dir.
+    # These are not rendered — just copied as-is.
+    for item in $SHARED_FILES; do
+        [ -e "$ROOT_DIR/$item" ] || die "SHARED_FILES references '$item' but it does not exist in $ROOT_DIR"
+        if [ -d "$ROOT_DIR/$item" ]; then
+            cp -r "$ROOT_DIR/$item" "$stage/$item"
+        else
+            cp "$ROOT_DIR/$item" "$stage/$item"
+        fi
+    done
 
     local existing='' m
     for m in $MANAGED; do
