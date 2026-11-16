@@ -1,9 +1,9 @@
-name: CI
+name: selftest
 
 on:
   workflow_dispatch:
   push:
-    branches: [main, master, "ci-infrastructure-integrator/**"]
+    branches: [main, master]
   pull_request:
     branches: [main, master]
 
