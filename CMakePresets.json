@@ -5,8 +5,7 @@
     {
       "name": "dev",
       "displayName": "Debug",
-      "binaryDir": "${sourceDir}/build/dev",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+      "binaryDir": "${sourceDir}/build/dev"
     },
     {
       "name": "release",
