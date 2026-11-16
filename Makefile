@@ -1,147 +1,82 @@
-# ── template-cpp: C++20/23 project archetype templates ────────────────
+# ── aw::template_cpp ─────────────────────────────────────────────────
+# `dotnet new`-style generator + everyday build targets for the generated project.
 #
-# Usage (from this repo):
-#   make init ARCHETYPE=<name> PROJECT=<name>
-#       Creates a new project directory named <project_name>/
-#       Copies templates/<archetype>/ into it, replaces placeholders.
+#   make init TYPE=<type> [NAME=<name>] [NS=<namespace>] [TESTS=0] [DRY=1]
+#   make list        list templates (and aliases)
+#   make selftest    generate + build + test every template (needs cmake, a compiler, network for Catch2)
+#   make eject       remove templates/ once you no longer need the generator
 #
-#   make init-list              — list available archetypes
-#
-# Usage (after init, in a generated project):
-#   make build                   — configure + build
-#   make test                    — build + run tests
-#   make lint                    — run clang-tidy (if available)
-#   make format                  — run clang-format (if available)
-#   make clean                   — remove build/
+#   make build | test | lint | format | clean      (BUILD_TYPE=Debug|Release, default Debug)
 #
 # Examples:
-#   make init ARCHETYPE=static PROJECT=my_lib
-#   make init ARCHETYPE=cli PROJECT=my_tool
-#   make init shared my_dll
+#   make init TYPE=static NAME=my-lib NS=aw::foo
+#   make init TYPE=cli                      # NAME inferred from this directory's name, NS=aw::unnamed
+#   make init TYPE=lib TESTS=0              # alias for static, without tests/ and Catch2
+#
+# Values reach scaffold.sh through the environment (AW_*), so no shell quoting is needed for NS=aw::foo etc.
 
-BUILD_TYPE ?= Debug
-BUILD_DIR  ?= build
+SCAFFOLD := bash templates/scaffold.sh
+PRESET   := $(if $(filter Release,$(BUILD_TYPE)),release,dev)
 
-.PHONY: build test lint format clean init-list \
-        init init-header_only init-static init-shared init-plugin \
-        init-module init-cli init-gui init-service init-kernel
+# Only honour variables given on the command line: NAME/TYPE often exist in the user's environment already.
+ifeq ($(origin TYPE),command line)
+export AW_TYPE := $(TYPE)
+endif
+ifeq ($(origin NAME),command line)
+export AW_NAME := $(NAME)
+endif
+ifeq ($(origin NS),command line)
+export AW_NS := $(NS)
+endif
+ifeq ($(origin TESTS),command line)
+export AW_TESTS := $(TESTS)
+endif
+ifeq ($(origin DRY),command line)
+export AW_DRY := $(DRY)
+endif
 
-# ── Build targets (for generated projects) ───────────────────────────
+.DEFAULT_GOAL := help
+.PHONY: help list init selftest eject build test lint format clean
+
+help:
+	@echo "aw::template_cpp — C++20 project generator"
+	@echo ""
+	@echo "Generator:"
+	@echo "  make init TYPE=<type> [NAME=<name>] [NS=<ns>] [TESTS=0] [DRY=1]"
+	@echo "  make list        list templates"
+	@echo "  make selftest    verify every template builds and passes its tests"
+	@echo "  make eject       remove templates/"
+	@echo ""
+	@echo "Project:"
+	@echo "  make build | test | lint | format | clean   (BUILD_TYPE=Release for release)"
+	@echo ""
+	@if [ -f templates/scaffold.sh ]; then $(SCAFFOLD) list; else echo "(templates/ has been ejected)"; fi
+
+list init selftest:
+	@if [ ! -f templates/scaffold.sh ]; then echo "error: templates/ not found (already ejected?)" >&2; exit 1; fi
+	@$(if $(filter selftest,$@),bash templates/selftest.sh,$(SCAFFOLD) $@)
+
+eject:
+	@$(SCAFFOLD) eject
+
+# ── project targets ──────────────────────────────────────────────────
 build:
-	cmake -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
-	cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) --parallel
+	cmake --preset $(PRESET)
+	cmake --build --preset $(PRESET)
 
 test: build
-	cmake -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
-	    -DAW__PROJECT_UPPER___BUILD_TESTS=ON \
-	    -DAW__PROJECT_UPPER___BUILD_EXAMPLES=OFF
-	cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) --parallel
-	ctest --test-dir $(BUILD_DIR) -C $(BUILD_TYPE) --output-on-failure
+	@if [ -f tests/CMakeLists.txt ]; then ctest --preset $(PRESET); \
+	else echo "No tests/ directory (generated with TESTS=0)."; fi
 
-lint:
-	@if command -v clang-tidy >/dev/null 2>&; then \
-	    find include src -name '*.hpp' -o -name '*.cpp' 2>/dev/null | \
-	        xargs clang-tidy -p $(BUILD_DIR) -- \
-	            -std=c++20 -I include || true; \
-	else \
-	    echo "clang-tidy not found; install clang-tidy"; \
-	fi
+lint: build
+	@if command -v clang-tidy >/dev/null 2>&1; then \
+	    find include src -name '*.hpp' -o -name '*.cpp' | xargs clang-tidy -p build/$(PRESET); \
+	else echo "clang-tidy not found"; fi
 
 format:
-	@if command -v clang-format >/dev/null 2>&; then \
-	    find include src -name '*.hpp' -o -name '*.cpp' 2>/dev/null | \
-	        xargs clang-format -i || true; \
-	else \
-	    echo "clang-format not found; install clang-format >= 15"; \
-	fi
+	@if command -v clang-format >/dev/null 2>&1; then \
+	    find include src tests -name '*.hpp' -o -name '*.cpp' 2>/dev/null | xargs clang-format -i; \
+	else echo "clang-format not found (>= 15 required)"; fi
 
 clean:
-	rm -rf $(BUILD_DIR)
-
-# ── Archetype scaffolding (dotnet new style) ─────────────────────────
-# Usage: make init ARCHETYPE=<archetype> PROJECT=<project_name>
-#   Creates <project_name>/ directory
-#   Copies templates/<archetype>/ into it
-#   Replaces __PROJECT__ / __PROJECT_NAME__ / __PROJECT_UPPER__ /
-#   __ProjectCamel__ / __MODULE_NAME__ placeholders
-
-init-list:
-	@echo "Available archetypes:"
-	@for a in header_only static shared plugin module cli gui service kernel; do echo "  $$a"; done
-	@echo ""
-	@echo "Usage: make init ARCHETYPE=<archetype> PROJECT=<project_name>"
-	@echo "  e.g. make init ARCHETYPE=static PROJECT=my_lib"
-
-init:
-	@ARCHETYPE="$(ARCHETYPE)"; \
-	PROJECT="$(PROJECT)"; \
-	if [ -z "$$PROJECT" ]; then \
-	    echo "Usage: make init ARCHETYPE=<archetype> PROJECT=<project_name>"; \
-	    echo ""; \
-	    echo "Available archetypes:"; \
-	    for a in header_only static shared plugin module cli gui service kernel; do echo "  $$a"; done; \
-	    exit 1; \
-	fi; \
-	if [ ! -d "templates/$$ARCHETYPE" ]; then \
-	    echo "ERROR: Unknown archetype '$$ARCHETYPE'"; \
-	    echo "Run 'make init-list' for available archetypes"; \
-	    exit 1; \
-	fi; \
-	if [ -d "$$PROJECT" ]; then \
-	    echo "ERROR: Directory '$$PROJECT' already exists"; \
-	    exit 1; \
-	fi; \
-	PROJ_LOWER=$$(echo "$$PROJECT" | tr '[:upper:]' '[:lower:]' | tr '-' '_'); \
-	PROJ_UPPER=$$(echo "$$PROJECT" | tr '[:lower:]' '[:upper:]' | tr '-' '_'); \
-	PROJ_CAMEL=$$(echo "$$PROJECT" | sed -E 's/(^|-)([a-z])/\U\2/g'); \
-	echo "==> Archetype : $$ARCHETYPE"; \
-	echo "==> Project   : $$PROJECT ($$PROJ_LOWER / $$PROJ_UPPER / $$PROJ_CAMEL)"; \
-	echo ""; \
-	echo "==> Creating $$PROJECT/ ..."; \
-	mkdir -p "$$PROJECT"; \
-	cp -r templates/$$ARCHETYPE/. "$$PROJECT/"; \
-	echo "==> Replacing __PROJECT__ placeholders..."; \
-	find "$$PROJECT" -name '*.hpp' -o -name '*.cpp' -o -name '*.h' -o -name '*.cppm' -o -name '*.c' -o -name '*.txt' -o -name '*.in' -o -name '*.bat' -o -name '*.service' -o -name '*.desktop' -o -name '*.plist' -o -name '*.swift' -o -name '*.rc' -o -name 'Kbuild' -o -name '*.svg' | \
-	    while read -r f; do \
-	        sed -i \
-	            -e "s|test__PROJECT__|test_$$PROJ_LOWER|g" \
-	            -e "s|__PROJECT__|$$PROJ_LOWER|g" \
-	            -e "s|__PROJECT_NAME__|$$PROJ_LOWER|g" \
-	            -e "s|__PROJECT_UPPER__|$$PROJ_UPPER|g" \
-	            -e "s|__ProjectCamel__|$$PROJ_CAMEL|g" \
-	            -e "s|__MODULE_NAME__|$$PROJ_LOWER|g" \
-	            "$$f"; \
-	    done; \
-	echo "==> Renaming files with __PROJECT__ in names..."; \
-	find "$$PROJECT" -type f \( -name '*__PROJECT__*' -o -name '*__PROJECT_UPPER__*' -o -name '*__ProjectCamel__*' \) | \
-	    while read -r f; do \
-	        base=$$(basename "$$f"); \
-	        dir=$$(dirname "$$f"); \
-	        new=$$(echo "$$base" | sed \
-	            -e "s|test__PROJECT__|test_$$PROJ_LOWER|g" \
-	            -e "s|__PROJECT__|$$PROJ_LOWER|g" \
-	            -e "s|__PROJECT_UPPER__|$$PROJ_UPPER|g" \
-	            -e "s|__ProjectCamel__|$$PROJ_CAMEL|g"); \
-	        if [ "$$base" != "$$new" ]; then \
-	            mv "$$f" "$$dir/$$new"; \
-	        fi; \
-	    done; \
-	find "$$PROJECT" -depth -type d \( -name '*__PROJECT__*' -o -name '*__PROJECT_UPPER__*' -o -name '*__ProjectCamel__*' \) | \
-	    while read -r f; do \
-	        base=$$(basename "$$f"); \
-	        dir=$$(dirname "$$f"); \
-	        new=$$(echo "$$base" | sed \
-	            -e "s|__PROJECT__|$$PROJ_LOWER|g" \
-	            -e "s|__PROJECT_UPPER__|$$PROJ_UPPER|g" \
-	            -e "s|__ProjectCamel__|$$PROJ_CAMEL|g"); \
-	        if [ "$$base" != "$$new" ] && [ "$$base" != "." ] && [ "$$base" != "$$PROJECT" ]; then \
-	            mv "$$f" "$$dir/$$new"; \
-	        fi; \
-	    done; \
-	echo "==> Copying Makefile..."; \
-	PROJ_UPPER_MK=$$(echo "$$PROJECT" | tr '[:lower:]' '[:upper:]' | tr '-' '_'); \
-	sed "s|__PROJECT_UPPER__|$$PROJ_UPPER_MK|g" Makefile > "$$PROJECT/Makefile"; \
-	echo "==> Done."; \
-	echo ""; \
-	echo "$$PROJECT/"; \
-	find "$$PROJECT" -not -name 'Makefile' -not -name 'VERSION' -not -name '.gitignore' -not -name '.clang-*' -not -name '.editorconfig' -not -name '.gitattributes' | sort
+	rm -rf build

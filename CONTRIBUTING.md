@@ -10,7 +10,7 @@ Be respectful, inclusive, and constructive. Harassment or discrimination of any 
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes following the [C++ guidelines](docs/CPP_GUIDELINES.md)
+3. Make your changes following `CLAUDE.md`
 4. Commit using [Conventional Commits](https://www.conventionalcommits.org/)
 5. Push to the branch (`git push origin feature/amazing-feature`)
 6. Open a Pull Request
@@ -19,7 +19,7 @@ Be respectful, inclusive, and constructive. Harassment or discrimination of any 
 
 ### Prerequisites
 
-- CMake ≥ 3.20
+- CMake ≥ 3.21
 - C++ compiler supporting C++20 (GCC ≥ 11, Clang ≥ 14, MSVC ≥ 19.30)
 - Git
 
@@ -34,18 +34,16 @@ cmake --build build --parallel
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
-### Running archetypes
+### Generating a project
 
 ```sh
-# List available archetypes
-make init-list
-
-# Scaffold a static library
-make init-static PROJECT=my_lib
-
-# Build the generated project
-cd my_lib && make build && make test
+make list
+make init TYPE=static NAME=my-lib NS=aw::foo
+make test
+make selftest   # verify every template
 ```
+
+See `README.md` and `CLAUDE.md` ("Rules for adding a template").
 
 ### Linting and formatting
 
