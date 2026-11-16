@@ -42,14 +42,13 @@ build_and_test() { # DIR TESTS(1|0)
     local d=$1
     if command -v cygpath >/dev/null 2>&1; then d=$(cygpath -m "$d"); fi
     # CMAKE_BUILD_TYPE is only needed for single-config generators (Ninja, Make).
-    # Multi-config generators (Visual Studio, Xcode) ignore it and use the build preset's
-    # "configuration" field instead.  Omit it on MSVC to avoid the CMake "unused-cli" warning.
-    local extra_args=""
-    local gen
-    gen=$(cmake --system-information 2>/dev/null | grep "^Default Strategy" | sed 's/.*: //' || true)
-    case "$gen" in
-        *Visual*|*Xcode*) ;; # multi-config — nothing to add
-        *) extra_args="-DCMAKE_BUILD_TYPE=Debug" ;; # single-config — need it
+    # Multi-config generators (Visual Studio on Windows, Xcode on macOS) ignore it and use
+    # the build preset's "configuration" field instead.  Omit it on MSVC to avoid the CMake
+    # "unused-cli" warning.  On Windows the default generator is Visual Studio (multi-config);
+    # on Linux/macOS it is Ninja/Make (single-config).
+    local extra_args="-DCMAKE_BUILD_TYPE=Debug"
+    case "$(uname -s)" in
+        MINGW*|MSYS*|CYGWIN*|Windows*) extra_args="" ;; # multi-config
     esac
     (cd "$d" && cmake --preset dev $extra_args >/dev/null && cmake --build --preset dev >/dev/null) || fail "build failed in $1"
     if [ "$2" = 1 ]; then
