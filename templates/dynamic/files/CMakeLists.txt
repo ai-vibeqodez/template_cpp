@@ -6,6 +6,13 @@ include(cmake/ProjectConfig)
 aw_project_config(NAME @@NAME@@ NS @@NS@@)
 project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
 
+# Compiler warnings (must come after project() so CMAKE_CXX_COMPILER_ID is known).
+if(MSVC)
+    set(AW_WARNINGS /W4)
+else()
+    set(AW_WARNINGS -Wall -Wextra -Wpedantic)
+endif()
+
 include(GenerateExportHeader)
 
 # Keep the DLL next to the executables (tests) so it is found at run time on Windows.

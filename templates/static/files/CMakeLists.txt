@@ -6,6 +6,13 @@ include(cmake/ProjectConfig)
 aw_project_config(NAME @@NAME@@ NS @@NS@@)
 project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
 
+# Compiler warnings (must come after project() so CMAKE_CXX_COMPILER_ID is known).
+if(MSVC)
+    set(AW_WARNINGS /W4)
+else()
+    set(AW_WARNINGS -Wall -Wextra -Wpedantic)
+endif()
+
 add_library(@@NAME@@ STATIC src/@@NAME_ID@@.cpp)
 add_library(@@NS@@::@@NAME@@ ALIAS @@NAME@@)
 target_include_directories(@@NAME@@ PUBLIC include)

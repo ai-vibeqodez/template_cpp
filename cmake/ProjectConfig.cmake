@@ -43,13 +43,6 @@ function(aw_project_config)
     set(CMAKE_CXX_EXTENSIONS OFF)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-    # --- Warnings ---
-    if(MSVC)
-        set(AW_WARNINGS /W4)
-    else()
-        set(AW_WARNINGS -Wall -Wextra -Wpedantic)
-    endif()
-
     # Export values to caller scope so root CMakeLists.txt can call project().
     set(AW_PROJECT_NAME    "${_CFG_NAME}"    PARENT_SCOPE)
     set(AW_PROJECT_VERSION "${_aw_version}"  PARENT_SCOPE)
