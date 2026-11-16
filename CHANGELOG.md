@@ -14,6 +14,8 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-17
+
 ### Added
 
 - `make init TYPE=<type> [NAME=] [NS=] [TESTS=0] [DRY=1]`: pure-Bash project generator (`templates/scaffold.sh`) with `cli`, `static` and `dynamic` templates, `@@KEY@@` placeholders, type aliases and name inference.
@@ -29,5 +31,6 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 - First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/ai-warevo/template_cpp/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ai-warevo/template_cpp/releases/tag/v0.1.0
