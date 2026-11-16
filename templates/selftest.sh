@@ -50,14 +50,23 @@ build_and_test() { # DIR TESTS(1|0)
     case "$(uname -s)" in
         MINGW*|MSYS*|CYGWIN*|Windows*) extra_args="" ;; # multi-config
     esac
-    local logfile="$WORK/build-$1.log"
-    (cd "$d" && cmake --preset dev $extra_args >"$logfile" 2>&1 && cmake --build --preset dev >>"$logfile" 2>&1) || {
+    local dirbase
+    dirbase=$(basename "$1")
+    local logfile="$WORK/build-${dirbase}.log"
+    {
+        echo "=== build_and_test: dir=$d extra_args=$extra_args ==="
+        echo "=== cmake version: $(cmake --version | head -1) ==="
+        echo "=== uname: $(uname -s) ==="
+        echo "=== cygpath: $(command -v cygpath 2>/dev/null || echo not found) ==="
+        echo "=== d after cygpath: $d ==="
+    } >>"$logfile" 2>&1
+    (cd "$d" && cmake --preset dev $extra_args >>"$logfile" 2>&1 && cmake --build --preset dev >>"$logfile" 2>&1) || {
         echo "=== cmake configure/build output ===" >&2
         cat "$logfile" >&2
         fail "build failed in $1"
     }
     if [ "$2" = 1 ]; then
-        local tlog="$WORK/test-$1.log"
+        local tlog="$WORK/test-${dirbase}.log"
         (cd "$d" && ctest --preset dev >"$tlog" 2>&1) || {
             echo "=== ctest output ===" >&2
             cat "$tlog" >&2
