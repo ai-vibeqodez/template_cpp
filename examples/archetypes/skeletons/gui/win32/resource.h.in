@@ -1,8 +1,0 @@
-#pragma once
-
-// aw::__PROJECT_NAME__ — Win32 resource identifiers
-//
-// Auto-generated from the template-cpp skeleton.
-
-#define IDI_ICON            101
-#define IDC_STATIC          -1

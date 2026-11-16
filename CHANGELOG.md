@@ -16,10 +16,12 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ### Added
 
-- Initial template: C++20 project scaffold with conflict-free `git pull template main` workflow.
-- Shared CMake infrastructure (`cmake/AwProjectDefaults.cmake`): sanitizers, coverage, warnings-as-errors, install/export.
-- Shared coding conventions (`docs/CPP_GUIDELINES.md`).
-- Minimal working library (`aw::template_cpp`), Catch2 v3 test, and example.
+- `make init TYPE=<type> [NAME=] [NS=] [TESTS=0] [DRY=1]`: pure-Bash project generator (`templates/scaffold.sh`) with `cli`, `static` and `dynamic` templates, `@@KEY@@` placeholders, type aliases and name inference.
+- `make list`, `make eject`, `make selftest`, and shared `CMakePresets.json`.
+
+### Changed
+
+- Replaced the old archetype-based `make init ARCHETYPE=... PROJECT=...` with the generator above.
 
 ## [0.1.0] - 2026-11-14
 

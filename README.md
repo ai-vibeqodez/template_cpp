@@ -1,158 +1,130 @@
 # ⚡ aw::template_cpp
 
-> **A production-grade C++20 project template.**
-> Pick one of 9 ready-made archetypes and start coding in minutes.
+> **A minimal C++20 project generator, like `dotnet new`.**
+> Pick a template, run one command, start coding.
 
----
+[![CI](https://github.com/ai-warevo/template-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-warevo/template-cpp/actions/workflows/ci.yml)
+[![Tests & Coverage](https://github.com/ai-warevo/template-cpp/actions/workflows/test.yml/badge.svg)](https://github.com/ai-warevo/template-cpp/actions/workflows/test.yml)
+[![coverage](https://raw.githubusercontent.com/ai-warevo/template-cpp/badges/coverage.svg)](https://ai-warevo.github.io/template-cpp/htmlcov/)
 
-## What is this?
-
-This is a **project starter kit** for C++20/23. You clone it, pick an **archetype** (a project type), and you get:
-
-- A working `CMakeLists.txt` — builds immediately
-- Tests (Catch2 v3), examples, and install rules
-- Sanitizers (ASan/TSan), code coverage, warnings-as-errors
-- `.clang-format`, `.clang-tidy`, `.editorconfig` — consistent style
-- A release workflow (SemVer, CHANGELOG, GitHub Actions)
-
-**You do not need to configure anything.** Just clone, pick a template, and go.
-
----
-
-## 9 Archetypes — pick your project type
-
-| # | Archetype | When to use it |
-|---|-----------|----------------|
-| 1 | **Header-only library** | Your library is all inline / templates — no `.cpp` files needed. |
-| 2 | **Static library** *(default)* | A regular library linked into your executables. Safe, simple, no DLL headaches. |
-| 3 | **Shared library** | A DLL / `.so` / `.dylib` that other programs load at runtime. |
-| 4 | **Plugin module** | A dynamically-loaded plugin with an `extern "C"` factory. |
-| 5 | **C++20 module** | You want to use `import` / `export module` (requires CMake 3.28+). |
-| 6 | **CLI executable** | A command-line tool with argument parsing. |
-| 7 | **GUI executable** | A desktop app — Win32, macOS `.app`, or Linux with `.desktop`. |
-| 8 | **System service** | A Windows SCM service or a Linux systemd daemon. |
-| 9 | **Kernel driver** | A Windows `.sys` driver or Linux `.ko` kernel module. |
-
-**Not sure which one?** Pick **2 — Static library** (it's the default). You can always change it later.
-
----
+The repository root stays clean. `CMakeLists.txt`, `src/`, `include/` and `tests/` appear only after `make init`.
+The generator is pure Bash (3.2+), so it runs on Linux, macOS and Windows Git Bash. It needs no Python.
 
 ## Quick start
 
-### Step 1: Clone and initialise
-
 ```sh
-# Clone this template
 git clone https://github.com/ai-warevo/template-cpp.git my-project
 cd my-project
 
-# Remove the template remote — your repo is now independent
-git remote remove template
-
-# (Optional) Add your own remote
-git remote add origin git@github.com:your-org/my-project.git
-git push -u origin main
+make list                                   # show templates
+make init TYPE=static NAME=my-lib NS=aw::foo
+make test                                   # configure + build + run tests
+make eject                                  # optional: remove the generator (templates/)
 ```
 
-### Step 2: Pick an archetype
+Git for Windows does not ship `make`. Call the script directly instead:
+`bash templates/scaffold.sh init static --name my-lib --ns aw::foo`.
 
-One command scaffolds your entire project:
+## Templates
+
+| `TYPE`    | Aliases               | Produces                                                         |
+|-----------|-----------------------|------------------------------------------------------------------|
+| `cli`     | `console`, `exe`, `app` | Executable: a small core library plus `main.cpp`               |
+| `static`  | `lib`, `library`      | Static library with a public header                              |
+| `dynamic` | `dll`, `so`, `shared` | Shared library with generated export macros (`GenerateExportHeader`) |
+
+All templates are C++20 with `CXX_EXTENSIONS OFF`, strict warnings, and Catch2 v3 tests.
+
+## `make init`
 
 ```sh
-make init-<archetype> PROJECT=<name>
+make init TYPE=<type> [NAME=<name>] [NS=<namespace>] [TESTS=0] [DRY=1]
 ```
 
-| Command | What it does |
-|---------|--------------|
-| `make init-list` | Show all available archetypes |
-| `make init-static PROJECT=my_lib` | Scaffold a static library |
-| `make init-shared PROJECT=my_app` | Scaffold a shared library / DLL |
-| `make init-header-only PROJECT=my_utils` | Scaffold a header-only library |
-| `make init-plugin PROJECT=my_plugin` | Scaffold a plugin module |
-| `make init-module PROJECT=my_mod` | Scaffold a C++20 module |
-| `make init-cli PROJECT=my_cli` | Scaffold a CLI executable |
-| `make init-gui PROJECT=my_gui` | Scaffold a GUI executable |
-| `make init-service PROJECT=my_svc` | Scaffold a system service / daemon |
-| `make init-kernel PROJECT=my_drv` | Scaffold a kernel driver |
+| Option  | Default               | Meaning                                                                                              |
+|---------|-----------------------|------------------------------------------------------------------------------------------------------|
+| `TYPE`  | required              | Template name or alias.                                                                              |
+| `NAME`  | current directory name | `[a-z][a-z0-9_-]*`. Not a C++ keyword and no `__`.                                                  |
+| `NS`    | `aw::unnamed`         | C++ namespace, `::`-separated identifiers (e.g. `aw::foo::bar`).                                     |
+| `TESTS` | `1`                   | `TESTS=0` skips `tests/` and the Catch2 `FetchContent` setup.                                        |
+| `DRY`   | `0`                   | `DRY=1` prints the files that would be generated and writes nothing.                                 |
 
-This copies a complete project structure from `examples/<archetype>/` into your directory, replaces all placeholder names with your project name, and generates a `Makefile`. **Existing files are never overwritten.**
+Re-running `make init` **overwrites** `CMakeLists.txt`, `src/`, `include/` and `tests/` without asking, and prints a warning that lists them.
+Rendering happens in a staging directory first, so a validation error never leaves a half-generated project.
 
-### Step 3: Build and test
+After a successful init you get a `make eject` hint. `make eject` removes `templates/` (the generator, its templates and its selftest).
+The shared files stay in the repository root.
+
+### Namespace example
+
+`make init TYPE=static NAME=my-lib NS=aw::foo` generates:
+
+```
+CMakeLists.txt                    # add_library(my-lib ...) + alias aw::foo::my-lib
+include/aw/foo/my_lib.hpp         # namespace aw::foo { ... }
+src/my_lib.cpp
+tests/CMakeLists.txt
+tests/my_lib_tests.cpp
+```
+
+## Project targets
 
 ```sh
-# Build
-make build
-
-# Run tests
+make build            # cmake --preset dev (Debug), or BUILD_TYPE=Release
 make test
-
-# Or with CMake directly
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
-ctest --test-dir build --output-on-failure
+make lint             # clang-tidy (needs a build)
+make format           # clang-format
+make clean
 ```
 
-**That's it.** Your project builds and tests pass.
+These use [`CMakePresets.json`](CMakePresets.json) (`dev` = Debug, `release`). You can also call `cmake --preset dev` yourself.
 
----
-
-## What's in the repo?
+## Layout
 
 ```
-docs/                ← Coding conventions (.clang-format, .clang-tidy, etc.)
-examples/            ← Archetype templates + shared cmake/ infrastructure
-scripts/             ← Utility scripts (release automation)
+Makefile              thin wrapper: help, list, init, selftest, eject, build/test/lint/format/clean
+CMakePresets.json     shared presets (dev, release)
+.clang-format .clang-tidy .editorconfig .gitignore .gitattributes
+scripts/              project-level scripts only (release.sh, release.ps1) — no generator code
+templates/
+  scaffold.sh         the generator: list | init | eject
+  selftest.sh         generates, builds and tests every template
+  <type>/
+    template.conf     DESCRIPTION="..." and ALIASES="..."
+    files/            mirrors the project root; rendered with @@KEY@@ placeholders
 ```
 
-Each directory under `examples/<archetype>/` is a **complete, self-contained project** with `CMakeLists.txt`, `src/`, `include/`, `tests/`, and `examples/`. When you run `make init-<archetype>`, that entire structure plus the shared `cmake/AwProjectDefaults.cmake` from `examples/cmake/` is copied to your directory.
+## Placeholders
 
-The `cmake/` directory (one shared file) is **template-owned** — embedded in `examples/cmake/`. Everything else is **project-owned** — you edit these freely.
+`@@KEY@@` is replaced in file **contents** and in file and directory **names**.
+Any `@@KEY@@` left unresolved fails the run and names the file and line.
 
----
+| Key               | `NAME=my-lib NS=aw::foo`  | Typical use                                |
+|-------------------|---------------------------|--------------------------------------------|
+| `@@NAME@@`        | `my-lib`                  | CMake project and target names             |
+| `@@NAME_ID@@`     | `my_lib`                  | File stems and C++ identifiers             |
+| `@@NAME_UPPER@@`  | `MY_LIB`                  | Macros                                     |
+| `@@NS@@`          | `aw::foo`                 | Qualified names, CMake alias namespace     |
+| `@@NS_OPEN@@`     | `namespace aw::foo {`     | Opens the namespace                        |
+| `@@NS_CLOSE@@`    | `} // namespace aw::foo`  | Closes the namespace                       |
+| `@@NS_PATH@@`     | `aw/foo`                  | Include directory layout                   |
+| `@@NS_UPPER@@`    | `AW_FOO`                  | Macro prefixes                             |
+| `@@MACRO_PREFIX@@`| `AW_FOO_MY_LIB`           | Export macro, e.g. `AW_FOO_MY_LIB_API`     |
+| `@@TYPE@@`        | `static`                  | Informational                              |
 
-## Updating the template
+## Adding a template
 
-When the template evolves (new archetypes, bug fixes, better conventions), you can pull updates without conflicts:
+1. `cp -r templates/static templates/<new-type>`.
+2. Edit `template.conf` (`DESCRIPTION`, `ALIASES`) and the files under `files/`.
+3. Run `make selftest`.
 
-```sh
-# Add the template remote (one-time)
-git remote add template https://github.com/ai-warevo/template-cpp.git
+The script needs no edits, because templates are auto-discovered. See [`CLAUDE.md`](CLAUDE.md) for the rules.
 
-# Pull updates — no conflicts guaranteed
-git pull template main
+## Verifying
 
-# Rebuild and test
-make build && make test
-```
-
-The separation between template-owned (`cmake/AwProjectDefaults.cmake` in `examples/cmake/`) and project-owned (`CMakeLists.txt`, `src/`, `include/`) means your code never conflicts with template updates.
-
----
-
-## CMake options
-
-| Option | Default | What it does |
-|--------|---------|-------------|
-| `AW_<PROJECT>_BUILD_TESTS` | `ON` | Build unit tests |
-| `AW_<PROJECT>_BUILD_EXAMPLES` | `ON` | Build example apps |
-| `AW_<PROJECT>_INSTALL` | `ON` | Generate install rules |
-| `AW_<PROJECT>_SANITIZE` | `none` | `none`, `address`, or `thread` |
-| `AW_<PROJECT>_ENABLE_COVERAGE` | `OFF` | Enable gcov / lcov |
-| `AW_<PROJECT>_CXX_STANDARD` | `20` | `20` or `23` |
-
----
-
-## Makefile shortcuts
-
-| Command | What it does |
-|---------|-------------|
-| `make build` | Configure + build (Debug) |
-| `make test` | Build + run ctest |
-| `make lint` | Run clang-tidy |
-| `make format` | Run clang-format |
-| `make clean` | Remove build/ |
-
----
+`make selftest` generates each template into a temporary directory, then configures, builds and runs `ctest`.
+It also checks validation errors, aliases, `--dry-run`, re-init, `--no-tests`, name inference and eject.
+It needs `cmake`, a C++20 compiler, and network access for Catch2 (unless Catch2 v3 is installed).
 
 ## License
 
