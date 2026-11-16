@@ -60,7 +60,7 @@ jobs:
 
       - name: 4. Build & Test (Clang + ASan/UBSan + compile_commands)
         run: |
-          cmake -B build-clang -G Ninja \
+          cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
@@ -68,14 +68,15 @@ jobs:
             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
             -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
             -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined"
-          cmake --build build-clang --parallel
-          if [ -d tests ]; then ctest --test-dir build-clang --output-on-failure; fi
+          cmake --build build --parallel
+          if [ -d tests ]; then ctest --test-dir build --output-on-failure; fi
 
       - name: 5. Run clang-tidy
         uses: ai-warevo/.github/ci/actions/clang-tidy@main
         with:
           source_dir: .
-          build_dir: build-clang
+          build_dir: build
+          header_filter: '.*/(include|src)/.*'
 
       - name: 6. Build & Test (GCC + ThreadSanitizer)
         run: |
