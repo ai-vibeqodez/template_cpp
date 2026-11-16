@@ -24,7 +24,7 @@ IndentRequiresClause: true
 RequiresExpressionIndentation: OuterScope
 SpaceBeforeParens: ControlStatements
 
-# Small inline accessors / one-line guards are used throughout.
+# Small inline accessors / one-line guards are used throughout (`if (!first) first = ...;`).
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortLambdasOnASingleLine: All
