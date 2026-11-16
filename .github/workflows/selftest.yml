@@ -1,0 +1,87 @@
+name: selftest
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint generator scripts
+        run: shellcheck templates/*.sh
+
+  discover:
+    name: Discover Templates
+    runs-on: ubuntu-latest
+    outputs:
+      templates: ${{ steps.find.outputs.templates }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        shell: bash
+        run: |
+          list=$(bash templates/scaffold.sh list | sed -n 's/^  \([^ ]*\) .*/"\1"/p' | paste -sd, -)
+          echo "templates=[$list]" >> "$GITHUB_OUTPUT"
+
+  template-ci:
+    name: Template — ${{ matrix.template }}
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: ${{ fromJSON(needs.discover.outputs.templates) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 1. Selftest (scaffold + GCC Debug + CTest + edge cases)
+        run: bash templates/selftest.sh "${{ matrix.template }}"
+
+      - name: 2. Scaffold template into workspace
+        run: bash templates/scaffold.sh init "${{ matrix.template }}" --name ci_check --ns aw::ci
+
+      - name: 3. Check clang-format
+        uses: ai-warevo/.github/ci/actions/clang-format@main
+        with:
+          source_dir: .
+          extensions: cpp,hpp
+
+      - name: 4. Build & Test (Clang + ASan/UBSan + compile_commands)
+        run: |
+          cmake -B build-clang -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined"
+          cmake --build build-clang --parallel
+          if [ -d tests ]; then ctest --test-dir build-clang --output-on-failure; fi
+
+      - name: 5. Run clang-tidy
+        uses: ai-warevo/.github/ci/actions/clang-tidy@main
+        with:
+          source_dir: .
+          build_dir: build-clang
+
+      - name: 6. Build & Test (GCC + ThreadSanitizer)
+        run: |
+          sudo sysctl vm.mmap_rnd_bits=28
+          cmake -B build-tsan -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_CXX_FLAGS="-fsanitize=thread" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=thread"
+          cmake --build build-tsan --parallel
+          if [ -d tests ]; then ctest --test-dir build-tsan --output-on-failure; fi
