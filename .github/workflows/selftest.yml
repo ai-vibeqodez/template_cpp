@@ -1,0 +1,90 @@
+name: selftest
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint generator scripts
+        run: shellcheck templates/*.sh
+
+  discover:
+    name: Discover Templates
+    runs-on: ubuntu-latest
+    outputs:
+      templates: ${{ steps.find.outputs.templates }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        shell: bash
+        run: |
+          list=$(bash templates/scaffold.sh list | sed -n 's/^  \([^ ]*\) .*/"\1"/p' | paste -sd, -)
+          echo "templates=[$list]" >> "$GITHUB_OUTPUT"
+          echo "Discovered: [$list]"
+
+  selftest:
+    name: ${{ matrix.template }} — ${{ matrix.env.name }}
+    needs: discover
+    strategy:
+      fail-fast: false
+      matrix:
+        template: ${{ fromJSON(needs.discover.outputs.templates) }}
+        env:
+          - name: Linux GCC
+            os: ubuntu-latest
+            cc: gcc
+            cxx: g++
+            generator: Ninja
+
+          - name: Linux Clang
+            os: ubuntu-latest
+            cc: clang
+            cxx: clang++
+            generator: Ninja
+
+          - name: macOS AppleClang
+            os: macos-latest
+            cc: clang
+            cxx: clang++
+            generator: Ninja
+
+          - name: Windows MSVC
+            os: windows-latest
+            cc: cl
+            cxx: cl
+            generator: Visual Studio 17 2022
+
+          - name: Windows Clang-CL
+            os: windows-latest
+            cc: clang-cl
+            cxx: clang-cl
+            generator: Ninja
+
+          - name: Windows MinGW GCC
+            os: windows-latest
+            cc: gcc
+            cxx: g++
+            generator: Ninja
+
+    runs-on: ${{ matrix.env.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSVC environment (Windows)
+        if: matrix.env.os == 'windows-latest' && (matrix.env.cc == 'cl' || matrix.env.cc == 'clang-cl')
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Run selftest (${{ matrix.template }} / ${{ matrix.env.name }})
+        shell: bash
+        env:
+          CC: ${{ matrix.env.cc }}
+          CXX: ${{ matrix.env.cxx }}
+          CMAKE_GENERATOR: ${{ matrix.env.generator }}
+        run: bash templates/selftest.sh "${{ matrix.template }}"
