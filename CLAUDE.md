@@ -1,10 +1,7 @@
 # CLAUDE.md
 
-Guidance for working on this project. Read `README.md` for the user-facing API; this file is about *how to change the repo*.
-
-## Read first
-
-**Always start by reading `docs/CPP_GUIDELINES.md`** — it contains the shared C++20/23 coding conventions, naming rules, formatting standards, threading invariants, and testing contracts extracted from the `ai-warevo` ecosystem. All AI agents and human contributors must follow these rules.
+Guidance for working on this project.
+Read `README.md` for the user-facing API; this file is about *how to change the repo*.
 
 ## Project-specific architecture
 
