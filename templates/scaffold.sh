@@ -42,6 +42,7 @@ is_keyword() {
     return 1
 }
 
+# shellcheck disable=SC2018,SC2019
 upper() { printf '%s' "$1" | LC_ALL=C tr 'a-z-' 'A-Z_'; }
 
 # ── template discovery ───────────────────────────────────────────────────────────────────────────────────────────
@@ -56,7 +57,9 @@ list_types() {
 # conf_get TYPE VAR — read DESCRIPTION / ALIASES from templates/TYPE/template.conf (sourced in a subshell).
 conf_get() {
     (
+        # shellcheck disable=SC2034
         DESCRIPTION=''
+        # shellcheck disable=SC2034
         ALIASES=''
         # shellcheck disable=SC1090
         . "$TPL_DIR/$1/template.conf"
@@ -66,6 +69,7 @@ conf_get() {
 
 resolve_type() {
     local want t a
+    # shellcheck disable=SC2018,SC2019
     want=$(printf '%s' "$1" | LC_ALL=C tr 'A-Z' 'a-z')
     for t in $(list_types); do
         [ "$t" = "$want" ] && { printf '%s' "$t"; return 0; }
@@ -106,6 +110,7 @@ EOF
 # ── validation / derivation ──────────────────────────────────────────────────────────────────────────────────────
 infer_name() {
     local b
+    # shellcheck disable=SC2018,SC2019
     b=$(basename "$1" | LC_ALL=C tr 'A-Z' 'a-z' | LC_ALL=C tr ' .' '--' | LC_ALL=C tr -cd 'a-z0-9_-')
     while [ -n "$b" ] && [[ $b != [a-z]* ]]; do b=${b#?}; done
     printf '%s' "$b"
@@ -156,6 +161,7 @@ render_file() { # SRC DST
 }
 
 # ── commands ─────────────────────────────────────────────────────────────────────────────────────────────────────
+# shellcheck disable=SC2034
 cmd_init() {
     local type=${AW_TYPE:-} name=${AW_NAME:-} ns=${AW_NS:-aw::unnamed} tests=${AW_TESTS:-1} dry=${AW_DRY:-0} out=$ROOT_DIR
     while [ $# -gt 0 ]; do

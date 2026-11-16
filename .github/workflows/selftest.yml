@@ -52,7 +52,6 @@ jobs:
           bash templates/scaffold.sh init "${{ matrix.template }}" --name ci_check --ns aw::ci
           bash templates/scaffold.sh eject
 
-
       - name: 3. Check clang-format
         uses: ai-warevo/.github/ci/actions/clang-format@main
         with:

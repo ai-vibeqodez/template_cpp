@@ -44,22 +44,32 @@ if [ $# -gt 0 ]; then TYPES="$*"; else TYPES=$($SCAFFOLD list | sed -n 's/^  \([
 
 section "generator checks"
 d=$(newproj checks)
+# shellcheck disable=SC2086
 expect_fail "missing TYPE is rejected" $SCAFFOLD init --out "$d" --name x
+# shellcheck disable=SC2086
 expect_fail "unknown TYPE is rejected" $SCAFFOLD init nope --out "$d" --name x
+# shellcheck disable=SC2086
 expect_fail "bad NAME is rejected" $SCAFFOLD init static --out "$d" --name 'Bad Name'
+# shellcheck disable=SC2086
 expect_fail "keyword NAME is rejected" $SCAFFOLD init static --out "$d" --name class
+# shellcheck disable=SC2086
 expect_fail "bad NS is rejected" $SCAFFOLD init static --out "$d" --name x --ns 'aw::1bad'
+# shellcheck disable=SC2086
 expect_fail "keyword NS is rejected" $SCAFFOLD init static --out "$d" --name x --ns 'aw::new'
+# shellcheck disable=SC2086
 expect_fail "empty NS segment is rejected" $SCAFFOLD init static --out "$d" --name x --ns 'aw::::x'
+# shellcheck disable=SC2086
 $SCAFFOLD init lib --out "$d" --name x --dry-run | grep -q 'Template : static' || fail "alias lib -> static"
 pass "alias lib resolves to static"
 [ ! -e "$d/CMakeLists.txt" ] && [ ! -e "$d/src" ] || fail "dry run wrote files"
 pass "dry run writes nothing"
+# shellcheck disable=SC2010,SC2143
 [ -z "$(ls -A "$d" | grep -v '^CMakePresets.json$')" ] || fail "dry run left stray files in output"
 
 for t in $TYPES; do
     section "template: $t"
     d=$(newproj "$t-hyphen")
+    # shellcheck disable=SC2086
     $SCAFFOLD init "$t" --out "$d" --name my-lib --ns aw::foo::bar >/dev/null || fail "init $t failed"
     for p in CMakeLists.txt src include tests; do [ -e "$d/$p" ] || fail "$t: missing $p"; done
     [ -f "$d/include/aw/foo/bar/my_lib.hpp" ] || fail "$t: namespace/name path not rendered"
@@ -69,6 +79,7 @@ for t in $TYPES; do
     pass "$t: init + build + ctest (NAME=my-lib NS=aw::foo::bar)"
 
     # Re-run over an existing project, without tests: must overwrite and drop tests/.
+    # shellcheck disable=SC2086
     $SCAFFOLD init "$t" --out "$d" --name other --no-tests 2>"$WORK/warn.txt" >/dev/null || fail "$t: re-init failed"
     grep -q 'overwriting' "$WORK/warn.txt" || fail "$t: no overwrite warning"
     [ ! -e "$d/tests" ] || fail "$t: tests/ not removed with --no-tests"
@@ -78,6 +89,7 @@ for t in $TYPES; do
 
     # Name inferred from the directory, default namespace.
     d=$(newproj "infer-$t/Inferred.Dir")
+    # shellcheck disable=SC2086
     $SCAFFOLD init "$t" --out "$d" >/dev/null || fail "$t: init with inferred name failed"
     [ -f "$d/include/aw/unnamed/inferred_dir.hpp" ] || fail "$t: NAME inference / default NS failed"
     pass "$t: NAME inferred from directory, NS defaults to aw::unnamed"
