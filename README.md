@@ -3,6 +3,10 @@
 > **A production-grade C++20 project template.**
 > Pick one of 9 ready-made archetypes and start coding in minutes.
 
+[![CI](https://github.com/ai-warevo/template-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-warevo/template-cpp/actions/workflows/ci.yml)
+[![Tests & Coverage](https://github.com/ai-warevo/template-cpp/actions/workflows/test.yml/badge.svg)](https://github.com/ai-warevo/template-cpp/actions/workflows/test.yml)
+[![coverage](https://raw.githubusercontent.com/ai-warevo/template-cpp/badges/coverage.svg)](https://ai-warevo.github.io/template-cpp/htmlcov/)
+
 ---
 
 ## What is this?
