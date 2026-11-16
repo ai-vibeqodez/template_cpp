@@ -88,3 +88,16 @@ jobs:
             -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=thread"
           cmake --build build-tsan --parallel
           if [ -d tests ]; then ctest --test-dir build-tsan --output-on-failure; fi
+
+  windows-msvc:
+    name: Windows MSVC (all templates)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Run selftest on MSVC
+        shell: bash
+        run: bash templates/selftest.sh
