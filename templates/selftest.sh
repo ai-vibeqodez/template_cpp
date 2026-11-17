@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 # selftest.sh — generate every template into a temp dir, then configure, build and test it.
 #   selftest.sh [TYPE...]     (default: all templates)
 set -eu
@@ -172,7 +173,7 @@ pass "static: installed package works with find_package(tobus) + aw::tobus"
 
 # Used as a subproject, tests/examples/install default to OFF.
 mkdir -p "$WORK/subproj"
-printf "cmake_minimum_required(VERSION 3.23)\nproject(sub CXX)\nadd_subdirectory("%s" lib)\nmessage(STATUS "SUB_TESTS=$${TOBUS_BUILD_TESTS}")\n" "$dd"
+printf 'cmake_minimum_required(VERSION 3.23)\nproject(sub CXX)\nadd_subdirectory("%s" lib)\nmessage(STATUS "SUB_TESTS=${TOBUS_BUILD_TESTS}")\n' "$dd" >"$WORK/subproj/CMakeLists.txt"
 (cd "$WORK/subproj" && cmake -B b 2>&1 | grep -q 'SUB_TESTS=OFF') || fail "static: tests not OFF when used as a subproject"
 pass "static: options default to OFF as a subproject"
 
