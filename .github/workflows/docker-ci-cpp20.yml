@@ -16,7 +16,51 @@ permissions:
   packages: write
 
 jobs:
+  test-in-container:
+    name: Test image in container
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image for testing
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ci-cpp20:test
+          cache-from: type=gha
+
+      - name: Verify toolchain versions
+        run: |
+          echo "=== g++ ==="
+          docker run --rm ci-cpp20:test g++ --version | head -1
+          echo "=== clang++-18 ==="
+          docker run --rm ci-cpp20:test clang++-18 --version | head -1
+          echo "=== cmake ==="
+          docker run --rm ci-cpp20:test cmake --version | head -1
+          echo "=== ninja ==="
+          docker run --rm ci-cpp20:test ninja --version
+          echo "=== clang-tidy ==="
+          docker run --rm ci-cpp20:test clang-tidy --version | head -1
+          echo "=== clang-format ==="
+          docker run --rm ci-cpp20:test clang-format --version | head -1
+          echo "=== gcovr ==="
+          docker run --rm ci-cpp20:test gcovr --version
+
+      - name: Run selftest inside container
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/workspace:rw" ci-cpp20:test bash -c '
+            cd /workspace && \
+            bash templates/selftest.sh
+          '
+
   build-and-push:
+    name: Build & Push
+    needs: test-in-container
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -52,8 +96,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
-            GIT_VERSION=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
