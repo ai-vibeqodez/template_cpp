@@ -5,14 +5,19 @@
 # Usage:
 #   include(cmake/Library/InstallExport)
 #   aw_install_library(NAME MyLib NS aw:: EXPORT_NAME mylib)
+#   aw_install_library(NAME tpl NS aw::tpl DEPENDENCIES Threads "OtherPkg 2.0")
+#
+# NS may be a prefix ("aw::") or, when it does not end in "::", the full alias of the library
+# ("aw::tpl"): consumers then link `aw::tpl`, and the package config is named after NAME.
+# DEPENDENCIES: one find_dependency() call per entry is written into the package config.
 #
 # Requires: GNUInstallDirs, CMakePackageConfigHelpers (included internally)
 # Depends on: CMAKE_CURRENT_BINARY_DIR, CMAKE_CURRENT_SOURCE_DIR, PROJECT_VERSION
 
 function(aw_install_library)
     set(_oneValue NAME NS EXPORT_NAME)
-    set(_multiValue)
-    cmake_parse_arguments(_INST "${_multiValue}" "${_oneValue}" "${_multiValue}" ${ARGN})
+    set(_multiValue DEPENDENCIES)
+    cmake_parse_arguments(_INST "" "${_oneValue}" "${_multiValue}" ${ARGN})
 
     if(NOT _INST_NAME)
         message(FATAL_ERROR "aw_install_library() requires NAME argument")
@@ -21,12 +26,28 @@ function(aw_install_library)
         message(FATAL_ERROR "aw_install_library() requires NS argument")
     endif()
 
+    # NS without a trailing "::" is the full alias (aw::tpl): split it into prefix "aw::" and exported name "tpl".
+    set(_inst_target_name "")
+    if(NOT _INST_NS MATCHES "::$")
+        if(_INST_NS MATCHES "^(.*::)([^:]+)$")
+            set(_INST_NS "${CMAKE_MATCH_1}")
+            set(_inst_target_name "${CMAKE_MATCH_2}")
+        else()
+            set(_inst_target_name "${_INST_NS}")
+            set(_INST_NS "")
+        endif()
+    endif()
+
     if(NOT _INST_EXPORT_NAME)
         set(_INST_EXPORT_NAME ${_INST_NAME})
     endif()
 
     include(GNUInstallDirs)
     include(CMakePackageConfigHelpers)
+
+    if(_inst_target_name)
+        set_target_properties(${_INST_NAME} PROPERTIES EXPORT_NAME ${_inst_target_name})
+    endif()
 
     # --- Install targets ---
     # CMake 3.23+ supports FILE_SET HEADERS (preferred);
@@ -63,10 +84,12 @@ function(aw_install_library)
     )
 
     # --- Config file (generated) ---
-    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_INST_EXPORT_NAME}Config.cmake"
-        "include(CMakeFindDependencyMacro)\n"
-        "include(\"\${CMAKE_CURRENT_LIST_DIR}/${_INST_EXPORT_NAME}Targets.cmake\")\n"
-    )
+    set(_inst_config "include(CMakeFindDependencyMacro)\n")
+    foreach(_dep IN LISTS _INST_DEPENDENCIES)
+        string(APPEND _inst_config "find_dependency(${_dep})\n")
+    endforeach()
+    string(APPEND _inst_config "include(\"\${CMAKE_CURRENT_LIST_DIR}/${_INST_EXPORT_NAME}Targets.cmake\")\n")
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_INST_EXPORT_NAME}Config.cmake" "${_inst_config}")
 
     install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/${_INST_EXPORT_NAME}Config.cmake"

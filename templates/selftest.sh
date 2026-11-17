@@ -131,6 +131,57 @@ for t in $TYPES; do
     pass "$t: NAME inferred from directory, NS defaults to aw::unnamed"
 done
 
+section "static template extras"
+d=$(newproj_ver static-extras)
+# shellcheck disable=SC2086
+$SCAFFOLD init static --out "$d" --name tobus --ns aw::tobus >/dev/null || fail "static extras: init failed"
+for p in examples/CMakeLists.txt examples/01_basic.cpp; do [ -e "$d/$p" ] || fail "static: missing $p"; done
+grep -q 'add_library(aw::tobus ALIAS tobus)' "$d/CMakeLists.txt" || fail "static: alias is not the namespace"
+grep -q 'FILE_SET HEADERS' "$d/CMakeLists.txt" || fail "static: no FILE_SET HEADERS"
+for o in TOBUS_BUILD_TESTS TOBUS_BUILD_EXAMPLES TOBUS_INSTALL TOBUS_WARNINGS_AS_ERRORS; do
+    grep -q "option($o " "$d/CMakeLists.txt" || fail "static: missing option $o"
+done
+pass "static: examples/, alias, FILE_SET and options rendered"
+
+dd=$d
+if command -v cygpath >/dev/null 2>&1; then dd=$(cygpath -m "$d"); fi
+inst="$WORK/static-extras-inst"
+(cd "$dd" && cmake -B build/x -DCMAKE_BUILD_TYPE=Debug -DTOBUS_WARNINGS_AS_ERRORS=ON -DCMAKE_INSTALL_PREFIX="$inst" >"$WORK/x.log" 2>&1 \
+    && cmake --build build/x >>"$WORK/x.log" 2>&1 && ctest --test-dir build/x >>"$WORK/x.log" 2>&1 \
+    && cmake --install build/x --config Debug >>"$WORK/x.log" 2>&1) || { cat "$WORK/x.log" >&2; fail "static: strict build/test/install failed"; }
+pass "static: -Werror build, tests, examples and install"
+
+# A consumer finds the installed package and links the alias.
+mkdir -p "$WORK/consumer"
+cat >"$WORK/consumer/CMakeLists.txt" <<'EOC'
+cmake_minimum_required(VERSION 3.23)
+project(consumer CXX)
+find_package(tobus REQUIRED)
+add_executable(c c.cpp)
+target_link_libraries(c PRIVATE aw::tobus)
+EOC
+cat >"$WORK/consumer/c.cpp" <<'EOC'
+#include <aw/tobus/tobus.hpp>
+int main() { return aw::tobus::greet("x").empty() ? 1 : 0; }
+EOC
+cw="$WORK/consumer"
+if command -v cygpath >/dev/null 2>&1; then cw=$(cygpath -m "$cw"); inst=$(cygpath -m "$inst"); fi
+(cd "$cw" && cmake -B b -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="$inst" >"$WORK/c.log" 2>&1 \
+    && cmake --build b --config Debug >>"$WORK/c.log" 2>&1) || { cat "$WORK/c.log" >&2; fail "static: find_package consumer failed"; }
+pass "static: installed package works with find_package(tobus) + aw::tobus"
+
+# Used as a subproject, tests/examples/install default to OFF.
+mkdir -p "$WORK/subproj"
+printf 'cmake_minimum_required(VERSION 3.23)\nproject(sub CXX)\nadd_subdirectory("%s" lib)\nmessage(STATUS "SUB_TESTS=${TOBUS_BUILD_TESTS}")\n' "$dd" >"$WORK/subproj/CMakeLists.txt"
+(cd "$WORK/subproj" && cmake -B b 2>&1 | grep -q 'SUB_TESTS=OFF') || fail "static: tests not OFF when used as a subproject"
+pass "static: options default to OFF as a subproject"
+
+section "out directory"
+d=$(newproj_ver out-var)
+(cd "$ROOT_DIR" && AW_OUT="$d" AW_TYPE=static AW_NAME=x $SCAFFOLD init >/dev/null) || fail "AW_OUT init failed"
+[ -f "$d/CMakeLists.txt" ] || fail "AW_OUT was not honoured"
+pass "AW_OUT selects the output directory"
+
 section "eject"
 # Run eject on a copy so the real templates/ stays intact.
 mkdir -p "$WORK/eject/templates"

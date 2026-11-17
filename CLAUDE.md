@@ -11,12 +11,12 @@ exist only in a generated project (the template files live under `templates/<typ
 ### Layout and ownership
 
 - `Makefile`: a thin wrapper. It exports command-line `TYPE/NAME/NS/TESTS/DRY` as `AW_*` environment variables (no shell quoting
-  needed for `NS=aw::foo`) and calls `templates/scaffold.sh`. It also holds the everyday `build/test/lint/format/clean` targets.
+  needed for `NS=aw::foo`) and calls `templates/scaffold.sh` (`OUT=` becomes `AW_OUT`; `--out` cannot be passed through make). It also holds the everyday `build/test/lint/format/clean` targets.
 - `templates/scaffold.sh`: the **only** generator code (`list | init | eject`). Pure Bash 3.2+. It has no per-template logic.
 - `templates/selftest.sh`: generates every template, builds it and runs ctest, plus generator checks.
 - `templates/<type>/template.conf`: sourced in a subshell. Only `DESCRIPTION` and `ALIASES` (space-separated) are read.
 - `templates/<type>/files/`: mirrors the project root. Its top-level entries must be in `MANAGED` in `scaffold.sh`
-  (`CMakeLists.txt src include tests`); `init` replaces exactly those on every run.
+  (`CMakeLists.txt src include tests examples`); `init` replaces exactly those on every run (`examples/` only if the template produces it).
 - `SHARED_FILES` in `scaffold.sh` lists files/dirs copied as-is from the repository root into the generated project:
   `cmake scripts .clang-format .clang-tidy .editorconfig .gitignore .gitattributes CMakePresets.json VERSION`.
   These are not rendered (no `@@KEY@@` processing).

@@ -7,7 +7,7 @@
 [![Tests & Coverage](https://github.com/ai-warevo/template_cpp/actions/workflows/test.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/test.yml)
 [![coverage](https://raw.githubusercontent.com/ai-warevo/template_cpp/badges/coverage.svg)](https://ai-warevo.github.io/template_cpp/htmlcov/)
 
-The repository root stays clean. `CMakeLists.txt`, `src/`, `include/` and `tests/` appear only after `make init`.
+The repository root stays clean. `CMakeLists.txt`, `src/`, `include/`, `tests/` and (for some templates) `examples/` appear only after `make init`.
 The generator is pure Bash (3.2+), so it runs on Linux, macOS and Windows Git Bash. It needs no Python.
 
 ## Quick start
@@ -38,7 +38,7 @@ All templates are C++20 (`cxx_std_20`), with `-Wall -Wextra -Wpedantic` (or `/W4
 ## `make init`
 
 ```sh
-make init TYPE=<type> [NAME=<name>] [NS=<namespace>] [TESTS=0] [DRY=1]
+make init TYPE=<type> [NAME=<name>] [NS=<namespace>] [OUT=<dir>] [TESTS=0] [DRY=1]
 ```
 
 | Option  | Default               | Meaning                                                                                              |
@@ -46,6 +46,7 @@ make init TYPE=<type> [NAME=<name>] [NS=<namespace>] [TESTS=0] [DRY=1]
 | `TYPE`  | required              | Template name or alias.                                                                              |
 | `NAME`  | current directory name | `[a-z][a-z0-9_-]*`. Not a C++ keyword and no `__`.                                                  |
 | `NS`    | `aw::unnamed`         | C++ namespace, `::`-separated identifiers (e.g. `aw::foo::bar`).                                     |
+| `OUT`   | repository root       | Directory to generate into (must exist). `make init … --out DIR` does **not** work: make eats the flag. |
 | `TESTS` | `1`                   | `TESTS=0` skips `tests/` and the Catch2 `FetchContent` setup.                                        |
 | `DRY`   | `0`                   | `DRY=1` prints the files that would be generated and writes nothing.                                 |
 
@@ -57,15 +58,30 @@ The shared files stay in the repository root.
 
 ### Namespace example
 
-`make init TYPE=static NAME=my-lib NS=aw::foo` generates:
+`make init TYPE=static NAME=foo NS=aw::foo` generates:
 
 ```
-CMakeLists.txt                    # add_library(my-lib ...) + alias aw::foo::my-lib
-include/aw/foo/my_lib.hpp         # namespace aw::foo { ... }
-src/my_lib.cpp
+CMakeLists.txt                    # add_library(foo ...) + alias aw::foo, FILE_SET HEADERS, options, install rules
+include/aw/foo/foo.hpp            # namespace aw::foo { ... }
+src/foo.cpp
+examples/CMakeLists.txt
+examples/01_basic.cpp
 tests/CMakeLists.txt
-tests/my_lib_tests.cpp
+tests/foo_tests.cpp
 ```
+
+The `static` template's CMake alias is the **namespace itself** (`aw::foo`), so use a namespace that ends in the project name.
+It also provides these options (`<NAME>` is the upper-cased project name, e.g. `FOO`):
+
+| Option                    | Default                          | Meaning                                              |
+|---------------------------|----------------------------------|------------------------------------------------------|
+| `<NAME>_BUILD_TESTS`      | `ON` when top level, else `OFF`  | Build `tests/` (Catch2 via FetchContent)             |
+| `<NAME>_BUILD_EXAMPLES`   | `ON` when top level, else `OFF`  | Build `examples/`                                    |
+| `<NAME>_INSTALL`          | `ON` when top level, else `OFF`  | Install rules + package config (`find_package(foo)`) |
+| `<NAME>_WARNINGS_AS_ERRORS` | `OFF`                          | Adds `-Wshadow -Wconversion -Werror` (`/WX`) to the library and examples |
+
+Public dependencies are declared in two places: `target_link_libraries(... PUBLIC ...)` and `DEPENDENCIES` of `aw_install_library()`,
+which writes one `find_dependency()` per entry into the package config.
 
 ## Project targets
 
@@ -77,7 +93,7 @@ make format           # clang-format
 make clean
 ```
 
-These use [`CMakePresets.json`](CMakePresets.json) (`dev` = Debug, `release`). You can also call `cmake --preset dev` yourself.
+These use [`CMakePresets.json`](CMakePresets.json) (`dev` = Debug, `release`, `clang18-libcxx` = Debug with `clang++-18 -stdlib=libc++`). You can also call `cmake --preset dev` yourself.
 
 ### Release & changelog
 
@@ -93,7 +109,7 @@ make changelog-dry-run       # preview changelog update
 ```
 Makefile              thin wrapper: help, list, init, selftest, eject, build/test/lint/format/clean
                       plus release, release-dry-run, changelog, changelog-dry-run
-CMakePresets.json     shared presets (dev, release)
+CMakePresets.json     shared presets (dev, release, clang18-libcxx)
 VERSION               project version
 CHANGELOG.md          user-visible changes
 CONTRIBUTING.md       how to contribute

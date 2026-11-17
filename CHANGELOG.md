@@ -14,6 +14,22 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+### Added
+
+- `make init … OUT=<dir>` (`AW_OUT`): generate into another directory. `examples/` is now a managed path.
+- `static` template: `examples/` with a sample, `FILE_SET HEADERS`, install rules, the options `<NAME>_BUILD_TESTS`, `_BUILD_EXAMPLES`, `_INSTALL` and `_WARNINGS_AS_ERRORS`, and CMake 3.23 as the minimum.
+- `aw_test_target(SOURCES …)` accepts several test sources (`TESTS_SOURCE` still works).
+- `aw_install_library(DEPENDENCIES …)` writes `find_dependency()` calls into the package config; `NS` may be the full alias (`aw::tpl`).
+- `clang18-libcxx` preset (`clang++-18 -stdlib=libc++`).
+
+### Changed
+
+- `static` template: the CMake alias is now `@@NS@@` (e.g. `aw::foo`) instead of `@@NS@@::@@NAME@@`; the tests, install and example targets follow. Tests/examples/install default to `OFF` when used as a subproject.
+
+### Fixed
+
+- `static` template: the include guard `#endif` now comes after the closing namespace.
+
 ## [0.3.0] - 2026-11-17
 
 ### Added

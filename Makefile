@@ -1,7 +1,7 @@
 # ── aw::template_cpp ─────────────────────────────────────────────────
 # `dotnet new`-style generator + everyday build targets for the generated project.
 #
-#   make init TYPE=<type> [NAME=<name>] [NS=<namespace>] [TESTS=0] [DRY=1]
+#   make init TYPE=<type> [NAME=<name>] [NS=<namespace>] [OUT=<dir>] [TESTS=0] [DRY=1]
 #   make list        list templates (and aliases)
 #   make selftest    generate + build + test every template (needs cmake, a compiler, network for Catch2)
 #   make eject       remove templates/ once you no longer need the generator
@@ -40,6 +40,9 @@ endif
 ifeq ($(origin TESTS),command line)
 export AW_TESTS := $(TESTS)
 endif
+ifeq ($(origin OUT),command line)
+export AW_OUT := $(OUT)
+endif
 ifeq ($(origin DRY),command line)
 export AW_DRY := $(DRY)
 endif
@@ -51,7 +54,7 @@ help:
 	@echo "aw::template_cpp — C++20 project generator"
 	@echo ""
 	@echo "Generator:"
-	@echo "  make init TYPE=<type> [NAME=<name>] [NS=<ns>] [TESTS=0] [DRY=1]"
+	@echo "  make init TYPE=<type> [NAME=<name>] [NS=<ns>] [OUT=<dir>] [TESTS=0] [DRY=1]"
 	@echo "  make list        list templates"
 	@echo "  make selftest    verify every template builds and passes its tests"
 	@echo "  make eject       remove templates/"

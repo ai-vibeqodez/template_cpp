@@ -10,7 +10,7 @@
 # Templates are auto-discovered; adding one needs no change to this script.
 #
 # Defaults can also come from the environment (this is how the Makefile passes them):
-#   AW_TYPE, AW_NAME, AW_NS (default aw::unnamed), AW_TESTS (1|0, default 1), AW_DRY (1|0)
+#   AW_TYPE, AW_NAME, AW_NS (default aw::unnamed), AW_TESTS (1|0, default 1), AW_DRY (1|0), AW_OUT (output dir)
 set -eu
 shopt -u patsub_replacement 2>/dev/null || true # Bash 5.2: keep '&' literal in replacements
 
@@ -18,7 +18,8 @@ TPL_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT_DIR=$(dirname "$TPL_DIR")
 
 # Top-level entries a template may produce. `init` replaces exactly these, so re-running it is idempotent.
-MANAGED="CMakeLists.txt src include tests"
+# (`examples` is only replaced when the template produces it, so hand-written examples/ survive other templates.)
+MANAGED="CMakeLists.txt src include tests examples"
 
 # Shared files/dirs copied as-is from the repository root into the generated project.
 # Not rendered (no @@KEY@@ processing) — just cp.
@@ -107,7 +108,7 @@ Options for init:
   --ns NAMESPACE  C++ namespace, e.g. aw::foo      (default: aw::unnamed)
   --no-tests      skip tests/ (and the Catch2 FetchContent setup)
   --dry-run       show what would be generated; write nothing
-  --out DIR       generate into DIR instead of the repository root
+  --out DIR       generate into DIR instead of the repository root (make: OUT=DIR)
 EOF
 }
 
@@ -167,7 +168,7 @@ render_file() { # SRC DST
 # ── commands ─────────────────────────────────────────────────────────────────────────────────────────────────────
 # shellcheck disable=SC2034
 cmd_init() {
-    local type=${AW_TYPE:-} name=${AW_NAME:-} ns=${AW_NS:-aw::unnamed} tests=${AW_TESTS:-1} dry=${AW_DRY:-0} out=$ROOT_DIR
+    local type=${AW_TYPE:-} name=${AW_NAME:-} ns=${AW_NS:-aw::unnamed} tests=${AW_TESTS:-1} dry=${AW_DRY:-0} out=${AW_OUT:-$ROOT_DIR}
     while [ $# -gt 0 ]; do
         case $1 in
             --name) [ $# -ge 2 ] || die "--name needs a value"; name=$2; shift ;;
@@ -263,6 +264,7 @@ EOF
 
     local existing='' m
     for m in $MANAGED; do
+        [ "$m" = examples ] && [ ! -e "$stage/examples" ] && continue
         [ -e "$out/$m" ] && existing="$existing $m"
     done
 
@@ -284,6 +286,7 @@ EOF
         warn "overwriting existing project files:$existing (replaced unconditionally)"
     fi
     for m in $MANAGED; do
+        [ "$m" = examples ] && [ ! -e "$stage/examples" ] && continue
         rm -rf "${out:?}/$m"
     done
     for m in $(cd "$stage" && ls -A); do

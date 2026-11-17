@@ -21,7 +21,8 @@ endfunction()
 #
 # Usage:
 #   include(cmake/Tests)
-#   aw_test_target(NAME MyLib TESTS_SOURCE mylib_tests.cpp LINK_TARGET aw::MyLib)
+#   aw_test_target(NAME MyLib SOURCES a_tests.cpp b_tests.cpp LINK_TARGET aw::MyLib)
+#   aw_test_target(NAME MyLib TESTS_SOURCE mylib_tests.cpp LINK_TARGET aw::MyLib)   # single file, still supported
 #
 # Link target can be:
 #   - core variant:  aw::MyLib::MyLib_core
@@ -30,14 +31,15 @@ endfunction()
 
 function(aw_test_target)
     set(_oneValue NAME TESTS_SOURCE LINK_TARGET)
-    set(_multiValue)
-    cmake_parse_arguments(_TEST "${_multiValue}" "${_oneValue}" "${_multiValue}" ${ARGN})
+    set(_multiValue SOURCES)
+    cmake_parse_arguments(_TEST "" "${_oneValue}" "${_multiValue}" ${ARGN})
 
     if(NOT _TEST_NAME)
         message(FATAL_ERROR "aw_test_target() requires NAME argument")
     endif()
-    if(NOT _TEST_TESTS_SOURCE)
-        message(FATAL_ERROR "aw_test_target() requires TESTS_SOURCE argument")
+    list(APPEND _TEST_SOURCES ${_TEST_TESTS_SOURCE})
+    if(NOT _TEST_SOURCES)
+        message(FATAL_ERROR "aw_test_target() requires SOURCES (or TESTS_SOURCE) argument")
     endif()
     if(NOT _TEST_LINK_TARGET)
         message(FATAL_ERROR "aw_test_target() requires LINK_TARGET argument")
@@ -58,7 +60,7 @@ function(aw_test_target)
     include(Catch)
 
     # --- Test executable ---
-    add_executable(${_TEST_NAME}_tests ${_TEST_TESTS_SOURCE})
+    add_executable(${_TEST_NAME}_tests ${_TEST_SOURCES})
     target_link_libraries(${_TEST_NAME}_tests PRIVATE ${_TEST_LINK_TARGET} Catch2::Catch2WithMain)
     target_compile_options(${_TEST_NAME}_tests PRIVATE ${AW_WARNINGS})
     catch_discover_tests(${_TEST_NAME}_tests)
