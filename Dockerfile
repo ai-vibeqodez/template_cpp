@@ -20,9 +20,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 
 # ── Debian forky repo (gcc-15, gcovr) ────────────────────────────────
-RUN echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
+RUN echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list && \
+    printf 'Package: *\nPin: release n=forky\nPin-Priority: 100\n' > /etc/apt/preferences.d/forky
 
-# ── All packages (Ubuntu 24.04 + forky) ──────────────────────────────
+# ── All packages ─────────────────────────────────────────────────────
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
@@ -39,9 +40,9 @@ RUN apt-get update && \
         libc++abi-18-dev \
         libunwind-18-dev \
         libclang-rt-18-dev \
-        gcc-15 \
-        g++-15 \
-        gcovr \
+    && \
+    apt-get install -y --no-install-recommends -t forky \
+        gcc-15 g++-15 gcovr \
     && \
     rm -rf /var/lib/apt/lists/*
 
