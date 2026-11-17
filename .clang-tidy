@@ -1,3 +1,7 @@
+# clang-tidy configuration for aw::template_cpp (C++20, header + source files)
+# Approach: * (all checks) minus exclusions — similar to nlohmann/json.
+# This catches new bugs automatically as LLVM adds new checks.
+#
 # Run locally: clang-tidy -p build/dev <file>
 # CI uses the narrow set in .github/workflows/ci.yml for speed.
 

@@ -25,7 +25,7 @@
 IS_POSIX := $(strip $(if $(MSYSTEM)$(CYGWIN)$(findstring WSL,$(SHELL)),1,))
 
 SCAFFOLD := bash templates/scaffold.sh
-PRESET   := $(if $(filter Release,$(BUILD_TYPE)),release,dev)
+PRESET   := $(if $(filter Release,$(BUILD_TYPE)),release,debug)
 
 # Only honour variables given on the command line: NAME/TYPE often exist in the user's environment already.
 ifeq ($(origin TYPE),command line)
@@ -72,38 +72,32 @@ eject:
 	@$(SCAFFOLD) eject
 
 # ── release & changelog ──────────────────────────────────────────────
-# Cut a SemVer release from CHANGELOG.md.
-# to push:
-#   make release PUSH=1
 release:
-ifeq ($(IS_POSIX),1)
-	sh scripts/release.sh $(if $(PUSH),--push)
-else
+ifneq ($(IS_POSIX),1)
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 $(if $(PUSH),-Push)
+else
+	bash scripts/release.sh $(if $(PUSH),--push)
 endif
 
 release-dry-run:
-ifeq ($(IS_POSIX),1)
-	sh scripts/release.sh --dry-run
-else
+ifneq ($(IS_POSIX),1)
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 -DryRun
+else
+	bash scripts/release.sh --dry-run
 endif
 
-# Generate [Unreleased] section in CHANGELOG.md from git log (conventional commits).
-# `make changelog` updates in place;
-# `make changelog FORCE=1` overwrites existing [Unreleased].
 changelog:
-ifeq ($(IS_POSIX),1)
-	sh scripts/changelog-update.sh $(if $(FORCE),--force)
-else
+ifneq ($(IS_POSIX),1)
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 $(if $(FORCE),-Force)
+else
+	bash scripts/changelog-update.sh $(if $(FORCE),--force)
 endif
 
 changelog-dry-run:
-ifeq ($(IS_POSIX),1)
-	sh scripts/changelog-update.sh --dry-run
-else
+ifneq ($(IS_POSIX),1)
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 -DryRun
+else
+	bash scripts/changelog-update.sh --dry-run
 endif
 
 # ── project targets ──────────────────────────────────────────────────
