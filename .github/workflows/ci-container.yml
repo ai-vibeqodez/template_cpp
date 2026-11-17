@@ -1,0 +1,80 @@
+name: CI (container)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/ai-warevo/ci-cpp20
+
+jobs:
+  selftest:
+    name: Selftest (all templates)
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify toolchain
+        run: |
+          echo "=== g++ ===" && g++ --version | head -1
+          echo "=== clang++-18 ===" && clang++-18 --version | head -1
+          echo "=== cmake ===" && cmake --version | head -1
+          echo "=== ninja ===" && ninja --version
+          echo "=== clang-tidy ===" && clang-tidy --version | head -1
+          echo "=== clang-format ===" && clang-format --version | head -1
+          echo "=== gcovr ===" && gcovr --version
+
+      - name: Selftest
+        run: bash templates/selftest.sh
+
+  lint:
+    name: Lint (clang-tidy + clang-format)
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scaffold template for linting
+        run: |
+          bash templates/scaffold.sh init static --name ci_check --ns aw::ci
+          bash templates/scaffold.sh eject
+
+      - name: clang-format check
+        run: |
+          find include src tests -name '*.hpp' -o -name '*.cpp' 2>/dev/null | xargs clang-format --dry-run -Werror -i || {
+            echo "::error::clang-format violations found"
+            exit 1
+          }
+
+      - name: Build
+        run: cmake --preset debug && cmake --build --preset debug
+
+      - name: clang-tidy
+        run: |
+          find include src -name '*.hpp' -o -name '*.cpp' | \
+            xargs clang-tidy -p build/debug --checks='*'
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: apt-get update && apt-get install -y shellcheck
+      - name: Lint generator scripts
+        run: shellcheck templates/*.sh
