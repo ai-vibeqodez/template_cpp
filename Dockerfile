@@ -14,31 +14,32 @@
 #   container: ghcr.io/ai-warevo/ci-cpp20:<tag>
 #   (no setup-toolchain action needed)
 
-FROM debian:trixie
+ARG BASE_IMAGE=docker.io/runzhliu/deepseek-harness:0.2.2-rc.3-r1
+FROM ${BASE_IMAGE}
 
-ENV DEBIAN_FRONTEND=noninteractive
+USER root
 
-RUN apt-get update && \
+RUN echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list && \
+    printf 'Package: *\nPin: release n=forky\nPin-Priority: 100\n' > /etc/apt/preferences.d/forky && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
         clang \
         clang-18 \
-        clang-format-18 \
-        clang-tidy-18 \
-        cmake \
-        gdb \
-        git \
-        lld \
         libc++-18-dev \
         libc++abi-18-dev \
         libunwind-18-dev \
         libclang-rt-18-dev \
+        clang-format \
+        clang-tidy \
+        cmake \
+        gdb \
+        git \
+        lld \
         ninja-build \
-        gcc-15 \
-        g++-15 \
-        gcovr \
     && \
+    apt-get install -y --no-install-recommends -t forky gcc-15 g++-15 gcovr && \
     rm -rf /var/lib/apt/lists/* && \
     ln -sf /usr/bin/gcc-15 /usr/bin/gcc && \
     ln -sf /usr/bin/g++-15 /usr/bin/g++ && \
