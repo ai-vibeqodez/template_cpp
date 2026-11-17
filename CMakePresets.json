@@ -7,6 +7,11 @@
   },
   "configurePresets": [
     {
+      "name": "dev",
+      "displayName": "Dev (Debug)",
+      "inherits": "debug"
+    },
+    {
       "name": "debug",
       "displayName": "Debug",
       "binaryDir": "${sourceDir}/build/Debug",
@@ -37,6 +42,11 @@
   ],
   "buildPresets": [
     {
+      "name": "dev",
+      "configurePreset": "dev",
+      "configuration": "Debug"
+    },
+    {
       "name": "debug",
       "configurePreset": "debug",
       "configuration": "Debug"
@@ -52,6 +62,14 @@
     }
   ],
   "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
     {
       "name": "debug",
       "configurePreset": "debug",
