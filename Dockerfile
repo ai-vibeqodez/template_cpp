@@ -40,14 +40,13 @@ RUN echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.
         libc++abi-18-dev \
         libunwind-18-dev \
         libclang-rt-18-dev \
-        ninja-build \
-    && \
+        ninja-build && \
+    apt-get update && \
     # gcc-15 and matching gcovr from forky (unstable)
     apt-get install -y --no-install-recommends -t forky \
         gcc-15 \
         g++-15 \
-        gcovr \
-    && \
+        gcovr && \
     rm -rf /var/lib/apt/lists/* && \
     ln -sf /usr/bin/gcc-15 /usr/bin/gcc && \
     ln -sf /usr/bin/g++-15 /usr/bin/g++ && \
