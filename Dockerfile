@@ -25,14 +25,11 @@ RUN echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.
     apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
-        clang \
         clang-18 \
         libc++-18-dev \
         libc++abi-18-dev \
         libunwind-18-dev \
         libclang-rt-18-dev \
-        clang-format \
-        clang-tidy \
         cmake \
         gdb \
         git \
@@ -43,5 +40,4 @@ RUN echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.
     rm -rf /var/lib/apt/lists/* && \
     ln -sf /usr/bin/gcc-15 /usr/bin/gcc && \
     ln -sf /usr/bin/g++-15 /usr/bin/g++ && \
-    g++-15 --version && \
-    clang++-18 --version
+    g++-15 --version
