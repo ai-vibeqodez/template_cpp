@@ -20,9 +20,9 @@
 #
 # Values reach scaffold.sh through the environment (AW_*), so no shell quoting is needed for NS=aw::foo etc.
 
-# Detect POSIX shell: MSYS2/MinGW/Cygwin/WSL all have /usr/bin/sh.
-# Only pure Windows (no MSYSTEM, no CYGWIN, no WSL) falls back to PowerShell.
-IS_POSIX := $(strip $(if $(MSYSTEM)$(CYGWIN)$(findstring WSL,$(SHELL)),1,))
+# Detect POSIX shell: MSYS2/MinGW/Cygwin/WSL all have /usr/bin.
+# Only pure Windows (no /usr/bin) falls back to PowerShell.
+IS_POSIX := $(strip $(if $(wildcard /usr/bin),1,))
 
 SCAFFOLD := bash templates/scaffold.sh
 PRESET   := $(if $(filter Release,$(BUILD_TYPE)),release,debug)
