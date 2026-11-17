@@ -1,3 +1,13 @@
+# CI (container) — C++20 Container Workflow
+#
+# Использует Docker-образ ghcr.io/ai-warevo/ci-cpp20 и composite actions
+# из ai-warevo/.github/ci/actions/.
+#
+# Linux-jobs: selftest + lint (clang-format + clang-tidy)
+# MSVC-jobs: build + test на нативном windows-latest
+#
+# selftest запускается отдельно на ubuntu-latest (shellcheck).
+
 name: CI (container)
 
 on:
@@ -15,6 +25,9 @@ env:
   IMAGE: ghcr.io/ai-warevo/ci-cpp20
 
 jobs:
+  # ────────────────────────────────────────────────────────────
+  # SELFTEST — проверить все шаблоны
+  # ────────────────────────────────────────────────────────────
   selftest:
     name: Selftest (all templates)
     runs-on: ubuntu-latest
@@ -37,6 +50,9 @@ jobs:
       - name: Selftest
         run: bash templates/selftest.sh
 
+  # ────────────────────────────────────────────────────────────
+  # LINT — clang-format + clang-tidy (Linux, container)
+  # ────────────────────────────────────────────────────────────
   lint:
     name: Lint (clang-tidy + clang-format)
     runs-on: ubuntu-latest
@@ -51,30 +67,73 @@ jobs:
           bash templates/scaffold.sh init static --name ci_check --ns aw::ci
           bash templates/scaffold.sh eject
 
-      - name: clang-format check
-        run: |
-          find include src tests -name '*.hpp' -o -name '*.cpp' 2>/dev/null | xargs clang-format --dry-run -Werror -i || {
-            echo "::error::clang-format violations found"
-            exit 1
-          }
+      # Setup toolchain (container mode — no-op installer)
+      - name: Setup toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: clang18-libcxx
+          container_mode: true
 
-      - name: Build
-        run: cmake --preset debug && cmake --build --preset debug
+      # Build with compile_commands.json for clang-tidy
+      - name: Configure & Build
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: Release
+          extra_args: "${{ steps.tc.outputs.cmake_args }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+          parallel: false
+
+      - name: clang-format check
+        uses: ai-warevo/.github/ci/actions/clang-format@main
+        with:
+          source_dir: .
+          extensions: cpp,hpp
+          exclude: _deps/*,build/*,CMakeFiles/*,cmake/*
 
       - name: clang-tidy
-        run: |
-          find include src -name '*.hpp' -o -name '*.cpp' | \
-            xargs clang-tidy -p build/debug --checks='*'
+        uses: ai-warevo/.github/ci/actions/clang-tidy@main
+        with:
+          source_dir: .
+          build_dir: build
+          header_filter: '.*'
+          exclude: _deps/*,build/*,CMakeFiles/*,cmake/*
 
-  shellcheck:
-    name: ShellCheck
-    runs-on: ubuntu-latest
-    container:
-      image: ${{ env.IMAGE }}
-      options: --user root
+  # ────────────────────────────────────────────────────────────
+  # BUILD-TEST — MSVC (Windows, native runner)
+  # ────────────────────────────────────────────────────────────
+  build-test-windows:
+    name: Build & Test Windows (MSVC)
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
     steps:
       - uses: actions/checkout@v4
-      - name: Install ShellCheck
-        run: apt-get update && apt-get install -y shellcheck
-      - name: Lint generator scripts
-        run: shellcheck templates/*.sh
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: msvc
+
+      - name: Configure & Build
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: ${{ matrix.build_type }}
+          extra_args: "${{ steps.tc.outputs.cmake_args }}"
+
+      - name: Run Tests
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: ${{ matrix.build_type }}
+          output_on_failure: true

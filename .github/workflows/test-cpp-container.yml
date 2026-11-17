@@ -1,0 +1,227 @@
+# Test (container) — C++20 Container Test + Coverage + Badge
+#
+# Использует Docker-образ ghcr.io/ai-warevo/ci-cpp20 и composite actions
+# из ai-warevo/.github/ci/actions/.
+#
+# Linux-jobs: test matrix + sanitizers + coverage + badge
+# MSVC-jobs: test на нативном windows-latest
+
+name: Test (container)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/ai-warevo/ci-cpp20
+
+jobs:
+  # ────────────────────────────────────────────────────────────
+  # TEST — Linux (container) — матрица санитайзеров
+  # ────────────────────────────────────────────────────────────
+  test:
+    name: Test (${{ matrix.toolchain }} / ${{ matrix.build_type }} / ${{ matrix.sanitizer || 'none' }})
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - clang18-libcxx
+          - gcc15
+        build_type:
+          - Debug
+        include:
+          # clang-18 libc++ с ASan
+          - toolchain: clang18-libcxx
+            build_type: RelWithDebInfo
+            sanitizer: address
+          # clang-18 libstdc++ с TSan (TSan требует libstdc++)
+          - toolchain: clang18-libstdcxx
+            build_type: RelWithDebInfo
+            sanitizer: thread
+          # gcc-15 с UBSan
+          - toolchain: gcc15
+            build_type: RelWithDebInfo
+            sanitizer: undefined
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          container_mode: true
+          sanitizer: ${{ matrix.sanitizer || '' }}
+
+      - name: Configure & Build
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: ${{ matrix.build_type }}
+          extra_args: "${{ steps.tc.outputs.cmake_args }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+
+      - name: Run Tests
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: ${{ matrix.build_type }}
+          output_on_failure: true
+
+  # ────────────────────────────────────────────────────────────
+  # TEST — Windows (MSVC native runner)
+  # ────────────────────────────────────────────────────────────
+  test-windows:
+    name: Test Windows (MSVC)
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: msvc
+
+      - name: Configure & Build
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: ${{ matrix.build_type }}
+          extra_args: "${{ steps.tc.outputs.cmake_args }}"
+
+      - name: Run Tests
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: ${{ matrix.build_type }}
+          output_on_failure: true
+
+  # ────────────────────────────────────────────────────────────
+  # COVERAGE — gcovr report (gcc-15 + libstdc++)
+  # ────────────────────────────────────────────────────────────
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.IMAGE }}
+      options: --user root
+    needs: test
+    if: success()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup toolchain
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: gcc15
+          container_mode: true
+
+      # Build with coverage flags
+      - name: Configure with coverage
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: Debug
+          extra_args: "${{ steps.tc.outputs.cmake_args }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS=-fprofile-arcs -ftest-coverage -DCMAKE_EXE_LINKER_FLAGS=-lgcov"
+
+      - name: Run Tests (coverage)
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: Debug
+          output_on_failure: true
+
+      - name: Generate Coverage Report
+        uses: ai-warevo/.github/ci/actions/gcovr-report@main
+        id: gcovr
+        with:
+          source_dir: .
+          build_dir: build
+          source_filter: 'src/ include/'
+          exclude: '_deps/*'
+          output_dir: htmlcov
+          xml_path: coverage.xml
+
+      - name: Upload coverage XML
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          retention-days: 30
+
+      - name: Upload coverage HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: htmlcov/
+          retention-days: 30
+
+  # ────────────────────────────────────────────────────────────
+  # BADGE — coverage badge generation + deploy
+  # ────────────────────────────────────────────────────────────
+  badge:
+    name: Coverage Badge
+    runs-on: ubuntu-latest
+    needs: coverage
+    if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download coverage XML
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-xml
+
+      - name: Parse Coverage Metrics
+        id: coverage_parser
+        uses: ai-warevo/.github/ci/actions/coverage-parser@main
+
+      - name: Generate Coverage Badge
+        id: badge_generator
+        uses: ai-warevo/.github/ci/actions/badge@main
+        with:
+          width: '99'
+          height: '20'
+          text_left: 'coverage'
+          text_right: '${{ steps.coverage_parser.outputs.percent }}%'
+          bg_color_right: '${{ steps.coverage_parser.outputs.color }}'
+          filename: 'coverage.svg'
+
+      - name: Deploy Badge
+        uses: ai-warevo/.github/ci/actions/badge-deploy@main
+        with:
+          badge_path: coverage.svg
+
+      - name: Deploy Coverage HTML
+        if: hashFiles('htmlcov/index.html') != ''
+        uses: ai-warevo/.github/ci/actions/coverage-html-deploy@main
+        with:
+          folder: htmlcov

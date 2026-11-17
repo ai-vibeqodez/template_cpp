@@ -1,4 +1,9 @@
-name: selftest
+# Selftest — генерация всех шаблонов, сборка, тесты, санитайзеры
+#
+# Запускает selftest.sh для каждого шаблона, проверяет clang-format,
+# clang-tidy, ASan/UBSan (Clang), TSan (GCC).
+
+name: Selftest
 
 on:
   workflow_dispatch:
@@ -12,14 +17,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  shellcheck:
-    name: ShellCheck
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Lint generator scripts
-        run: shellcheck templates/*.sh
-
+  # ────────────────────────────────────────────────────────────
+  # DISCOVER — найти все шаблоны
+  # ────────────────────────────────────────────────────────────
   discover:
     name: Discover Templates
     runs-on: ubuntu-latest
@@ -33,10 +33,16 @@ jobs:
           list=$(bash templates/scaffold.sh list | sed -n 's/^  \([^ ]*\) .*/"\1"/p' | paste -sd, -)
           echo "templates=[$list]" >> "$GITHUB_OUTPUT"
 
+  # ────────────────────────────────────────────────────────────
+  # TEMPLATE-CI — каждый шаблон: scaffold + build + test + lint
+  # ────────────────────────────────────────────────────────────
   template-ci:
     name: Template — ${{ matrix.template }}
     needs: discover
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ai-warevo/ci-cpp20
+      options: --user root
     strategy:
       fail-fast: false
       matrix:
@@ -44,51 +50,85 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 1. Selftest (scaffold + GCC Debug + CTest + edge cases)
+      # 1. Selftest (scaffold + GCC Debug + CTest + edge cases)
+      - name: Selftest
         run: bash templates/selftest.sh "${{ matrix.template }}"
 
-      - name: 2. Scaffold template into workspace & eject templates/
+      # 2. Scaffold template into workspace & eject templates/
+      - name: Scaffold template
         run: |
           bash templates/scaffold.sh init "${{ matrix.template }}" --name ci_check --ns aw::ci
           bash templates/scaffold.sh eject
 
-      - name: 3. Check clang-format
+      # 3. clang-format check
+      - name: clang-format check
         uses: ai-warevo/.github/ci/actions/clang-format@main
         with:
           source_dir: .
           extensions: cpp,hpp
 
-      - name: 4. Build & Test (Clang + ASan/UBSan + compile_commands)
-        run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
-            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
-            -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined"
-          cmake --build build --parallel
-          if [ -d tests ]; then ctest --test-dir build --output-on-failure; fi
+      # 4. Build & Test (Clang + ASan/UBSan + compile_commands)
+      - name: Setup toolchain (Clang + sanitizers)
+        id: tc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: clang18-libcxx
+          container_mode: true
+          sanitizer: address
 
-      - name: 5. Run clang-tidy
+      - name: Configure & Build (Clang + ASan/UBSan)
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build
+          build_type: RelWithDebInfo
+          extra_args: "${{ steps.tc.outputs.cmake_args }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+
+      - name: Run Tests (Clang + ASan/UBSan)
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build
+          config: RelWithDebInfo
+          output_on_failure: true
+
+      # 5. clang-tidy
+      - name: clang-tidy
         uses: ai-warevo/.github/ci/actions/clang-tidy@main
         with:
           source_dir: .
           build_dir: build
           header_filter: '.*/(include|src)/.*'
 
-      - name: 6. Build & Test (GCC + ThreadSanitizer)
-        run: |
-          sudo sysctl vm.mmap_rnd_bits=28
-          cmake -B build-tsan -G Ninja \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCMAKE_CXX_FLAGS="-fsanitize=thread" \
-            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread" \
-            -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=thread"
-          cmake --build build-tsan --parallel
-          if [ -d tests ]; then ctest --test-dir build-tsan --output-on-failure; fi
+      # 6. Build & Test (GCC + ThreadSanitizer)
+      - name: Setup toolchain (GCC + TSan)
+        id: tc_gcc
+        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        with:
+          toolchain: gcc15
+          container_mode: true
+          sanitizer: thread
 
+      - name: Configure & Build (GCC + TSan)
+        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        with:
+          source_dir: .
+          build_dir: build-tsan
+          build_type: RelWithDebInfo
+          extra_args: "${{ steps.tc_gcc.outputs.cmake_args }}"
+          parallel: false
+
+      - name: Run Tests (GCC + TSan)
+        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        with:
+          source_dir: .
+          build_dir: build-tsan
+          config: RelWithDebInfo
+          output_on_failure: true
+
+  # ────────────────────────────────────────────────────────────
+  # WINDOWS-MSVC — проверка генерации на Windows
+  # ────────────────────────────────────────────────────────────
   windows-msvc:
     name: Windows MSVC (all templates)
     runs-on: windows-latest
