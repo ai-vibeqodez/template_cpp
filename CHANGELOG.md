@@ -14,6 +14,12 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-18
+
+### Added
+
+- add script updater with auto-sync and pre-flight checks
+
 ## [0.4.2] - 2026-11-18
 
 ### Fixed
@@ -102,7 +108,8 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 - First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/ai-warevo/template_cpp/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/ai-warevo/template_cpp/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/ai-warevo/template_cpp/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/ai-warevo/template_cpp/compare/v0.3.0...v0.4.0
