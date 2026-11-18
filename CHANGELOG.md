@@ -14,6 +14,31 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-18
+
+### Fixed
+
+- scripts
+- quote CMake flags with spaces in coverage job extra_args
+- re-run apt-get update before installing forky packages
+- remove clang-format/clang-tidy, CI actions install them
+- use deepseek-harness base, add libunwind+libclang-rt, remove docker-in-d
+- use debian:trixie, remove forky, add all toolchains
+- switch to debian:trixie, remove forky entirely
+- restore forky repo matching Dockerfile.fix
+- remove forky pinning, install gcc-15 directly
+- add "dev" preset to CMakePresets.json
+- fix IS_POSIX detection in Makefile
+- disable SC2016 in selftest.sh printf
+- resolve SC2016 in selftest.sh printf
+
+### Changed
+
+- add MSVC support to all CI/CD workflows
+- add container-based CI workflow
+- use Debian-based CI image with gcc-15 from forky and clang-18
+- synchronize project configs and add CMakeUserPresets.json.example
+
 ## [0.4.0] - 2026-11-17
 
 ### Added
@@ -71,7 +96,8 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 - First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/ai-warevo/template_cpp/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/ai-warevo/template_cpp/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ai-warevo/template_cpp/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ai-warevo/template_cpp/compare/v0.1.0...v0.2.0
