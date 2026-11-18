@@ -48,7 +48,7 @@ export AW_DRY := $(DRY)
 endif
 
 .DEFAULT_GOAL := help
-.PHONY: help list init selftest eject build test lint format clean release release-dry-run changelog changelog-dry-run
+.PHONY: help list init selftest eject build test lint format clean release release-dry-run changelog changelog-dry-run update
 
 help:
 	@echo "aw::template_cpp — C++20 project generator"
@@ -98,6 +98,14 @@ ifneq ($(IS_POSIX),1)
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 -DryRun
 else
 	bash scripts/changelog-update.sh --dry-run
+endif
+
+# Update all scripts from ai-warevo/.github.
+update:
+ifneq ($(IS_POSIX),1)
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/updater.ps1
+else
+	bash scripts/updater.sh
 endif
 
 # ── project targets ──────────────────────────────────────────────────
