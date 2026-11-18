@@ -14,6 +14,12 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-18
+
+### Fixed
+
+- fix duplicate heading and empty tag list handling
+
 ## [0.4.1] - 2026-11-18
 
 ### Fixed
@@ -96,7 +102,8 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 - First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/ai-warevo/template_cpp/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/ai-warevo/template_cpp/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/ai-warevo/template_cpp/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ai-warevo/template_cpp/compare/v0.2.0...v0.3.0
