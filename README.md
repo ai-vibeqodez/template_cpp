@@ -12,7 +12,7 @@ The generator is pure Bash (3.2+), so it runs on Linux, macOS and Windows Git Ba
 
 ## CI/CD
 
-`pr-fast.yml` calls the shared `ai-warevo/.github` reusable workflow for formatting, build, clang-tidy, and test checks. The generator selftest, Windows checks, ShellCheck, sanitizer and coverage matrix, and CI-container image checks remain project-specific because they validate this repository's generator and its templates.
+`pr-fast.yml` calls the shared `ai-warevo/.github` reusable workflow for formatting, build, clang-tidy, and test checks. The selftest, Windows, ShellCheck, sanitizer/coverage, and CI-container checks remain project-specific because they validate this repository's generator and templates. Releases are run from the GitHub Actions **Release** workflow, which uses shared changelog and release actions; no project release scripts are required.
 
 ## Quick start
 
@@ -99,27 +99,20 @@ make clean
 
 These use [`CMakePresets.json`](CMakePresets.json) (`dev` = Debug, `release`, `clang18-libcxx` = Debug with `clang++-18 -stdlib=libc++`). You can also call `cmake --preset dev` yourself.
 
-### Release & changelog
+### Releases
 
-```sh
-make release [PUSH=1]        # cut a SemVer release from CHANGELOG.md
-make release-dry-run         # preview the next version
-make changelog [FORCE=1]     # update [Unreleased] from git log (conventional commits)
-make changelog-dry-run       # preview changelog update
-```
+Run **Actions → Release → Run workflow** to promote the prepared `## [Unreleased]` section, choose the next SemVer version from `CHANGELOG.md`, update `VERSION`, create a `vX.Y.Z` tag, and publish a GitHub Release. The optional `version` input accepts an explicit `X.Y.Z` override; leave it as `auto` to derive the version from changelog categories. For a release prepared outside Actions, push its `vX.Y.Z` tag to publish the GitHub Release.
 
 ## Layout
 
 ```
 Makefile              thin wrapper: help, list, init, selftest, eject, build/test/lint/format/clean
-                      plus release, release-dry-run, changelog, changelog-dry-run
 CMakePresets.json     shared presets (dev, release, clang18-libcxx)
 VERSION               project version
 CHANGELOG.md          user-visible changes
 CONTRIBUTING.md       how to contribute
 .clang-format .clang-tidy .editorconfig .gitignore .gitattributes
 cmake/                shared CMake modules (ProjectConfig, Tests, CoreLibrary, Library/, Windows/)
-scripts/              project-level scripts (release.sh, release.ps1, changelog-update.sh, changelog-update.ps1)
 templates/
   scaffold.sh         the generator: list | init | eject
   selftest.sh         generates, builds and tests every template
@@ -152,7 +145,7 @@ Any `@@KEY@@` left unresolved fails the run and names the file and line.
 2. Edit `template.conf` (`DESCRIPTION`, `ALIASES`) and the files under `files/`.
 3. Run `make selftest`.
 
-The script needs no edits, because templates are auto-discovered. See [`CLAUDE.md`](CLAUDE.md) for the rules.
+The script needs no edits, because templates are auto-discovered. See [`AGENTS.md`](AGENTS.md) for the rules.
 
 ## Verifying
 

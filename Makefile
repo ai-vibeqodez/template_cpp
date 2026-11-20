@@ -8,21 +8,12 @@
 #
 #   make build | test | lint | format | clean      (BUILD_TYPE=Debug|Release, default Debug)
 #
-#   make release [PUSH=1]        cut a SemVer release from CHANGELOG.md
-#   make release-dry-run         preview the next version without changing anything
-#   make changelog [FORCE=1]     update [Unreleased] from git log (conventional commits)
-#   make changelog-dry-run       preview changelog update
-#
 # Examples:
 #   make init TYPE=static NAME=my-lib NS=aw::foo
 #   make init TYPE=cli                      # NAME inferred from this directory's name, NS=aw::unnamed
 #   make init TYPE=lib TESTS=0              # alias for static, without tests/ and Catch2
 #
 # Values reach scaffold.sh through the environment (AW_*), so no shell quoting is needed for NS=aw::foo etc.
-
-# Detect POSIX shell: MSYS2/MinGW/Cygwin/WSL all have /usr/bin.
-# Only pure Windows (no /usr/bin) falls back to PowerShell.
-IS_POSIX := $(strip $(if $(wildcard /usr/bin),1,))
 
 SCAFFOLD := bash templates/scaffold.sh
 PRESET   := $(if $(filter Release,$(BUILD_TYPE)),release,debug)
@@ -48,7 +39,7 @@ export AW_DRY := $(DRY)
 endif
 
 .DEFAULT_GOAL := help
-.PHONY: help list init selftest eject build test lint format clean release release-dry-run changelog changelog-dry-run update
+.PHONY: help list init selftest eject build test lint format clean
 
 help:
 	@echo "aw::template_cpp — C++23 project generator"
@@ -70,43 +61,6 @@ list init selftest:
 
 eject:
 	@$(SCAFFOLD) eject
-
-# ── release & changelog ──────────────────────────────────────────────
-release:
-ifneq ($(IS_POSIX),1)
-	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 $(if $(PUSH),-Push)
-else
-	bash scripts/release.sh $(if $(PUSH),--push)
-endif
-
-release-dry-run:
-ifneq ($(IS_POSIX),1)
-	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 -DryRun
-else
-	bash scripts/release.sh --dry-run
-endif
-
-changelog:
-ifneq ($(IS_POSIX),1)
-	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 $(if $(FORCE),-Force)
-else
-	bash scripts/changelog-update.sh $(if $(FORCE),--force)
-endif
-
-changelog-dry-run:
-ifneq ($(IS_POSIX),1)
-	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/changelog-update.ps1 -DryRun
-else
-	bash scripts/changelog-update.sh --dry-run
-endif
-
-# Update all scripts from ai-warevo/.github.
-update:
-ifneq ($(IS_POSIX),1)
-	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/updater.ps1
-else
-	bash scripts/updater.sh
-endif
 
 # ── project targets ──────────────────────────────────────────────────
 build:

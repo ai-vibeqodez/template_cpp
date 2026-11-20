@@ -26,7 +26,7 @@ jobs:
     outputs:
       templates: ${{ steps.find.outputs.templates }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - id: find
         shell: bash
         run: |
@@ -48,7 +48,7 @@ jobs:
       matrix:
         template: ${{ fromJSON(needs.discover.outputs.templates) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
 
       # 1. Selftest (scaffold + GCC Debug + CTest + edge cases)
       - name: Selftest
@@ -133,10 +133,10 @@ jobs:
     name: Windows MSVC (all templates)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
 
       - name: Setup MSVC environment
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@main
 
       - name: Run selftest on MSVC
         shell: bash

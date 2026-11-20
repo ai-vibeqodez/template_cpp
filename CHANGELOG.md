@@ -6,16 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!--
-Maintainer notes (see CLAUDE.md, "Changelog & releases"):
+Maintainer notes (see AGENTS.md, "Changelog and releases"):
 - Add every user-visible change under `## [Unreleased]` in the same commit that makes it.
 - Categories: Breaking, Added, Changed, Deprecated, Removed, Fixed, Security. Omit empty ones.
-- scripts/release.sh / scripts/release.ps1 derive the next version from those categories.
+- The GitHub Actions Release workflow uses shared catalog actions to prepare releases.
 -->
 
 ## [Unreleased]
 
 ### Changed
 - Route PR fast checks through the shared ai-warevo reusable workflow.
+- Use catalog actions for release automation and remove local release/changelog updater scripts.
+- Stop copying release tooling into generated projects and document contributor guidance in `AGENTS.md`.
 
 
 ## [0.5.0] - 2026-11-18
@@ -23,6 +25,7 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 ### Added
 
 - add script updater with auto-sync and pre-flight checks
+
 
 ## [0.4.2] - 2026-11-18
 

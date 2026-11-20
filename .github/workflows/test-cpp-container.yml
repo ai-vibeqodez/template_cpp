@@ -10,8 +10,6 @@ name: Test (container)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main, master]
 
 permissions:
   contents: write
@@ -57,7 +55,7 @@ jobs:
             sanitizer: undefined
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
 
       - name: Setup toolchain
         id: tc
@@ -66,6 +64,9 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           container_mode: true
           sanitizer: ${{ matrix.sanitizer || '' }}
+
+      - name: Scaffold project
+        run: bash templates/scaffold.sh init static --name ci_check --ns aw::ci
 
       - name: Configure & Build
         uses: ai-warevo/.github/.github/actions/cmake-build@main
@@ -94,16 +95,20 @@ jobs:
       matrix:
         build_type: [Debug, Release]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
 
       - name: Setup MSVC environment
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@main
 
       - name: Setup toolchain
         id: tc
         uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: msvc
+
+      - name: Scaffold project
+        shell: bash
+        run: bash templates/scaffold.sh init static --name ci_check --ns aw::ci
 
       - name: Configure & Build
         uses: ai-warevo/.github/.github/actions/cmake-build@main
@@ -133,7 +138,10 @@ jobs:
     needs: test
     if: success()
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
+
+      - name: Scaffold project
+        run: bash templates/scaffold.sh init static --name ci_check --ns aw::ci
 
       - name: Setup toolchain
         id: tc
@@ -171,14 +179,14 @@ jobs:
           xml_path: coverage.xml
 
       - name: Upload coverage XML
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: coverage-xml
           path: coverage.xml
           retention-days: 30
 
       - name: Upload coverage HTML
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: coverage-html
           path: htmlcov/
@@ -193,10 +201,10 @@ jobs:
     needs: coverage
     if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
 
       - name: Download coverage XML
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@main
         with:
           name: coverage-xml
 

@@ -35,7 +35,7 @@ jobs:
       image: ${{ env.IMAGE }}
       options: --user root
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
 
       - name: Verify toolchain
         run: |
@@ -60,7 +60,7 @@ jobs:
       image: ${{ env.IMAGE }}
       options: --user root
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
 
       - name: Scaffold template for linting
         run: |
@@ -111,10 +111,10 @@ jobs:
       matrix:
         build_type: [Debug, Release]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
 
       - name: Setup MSVC environment
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@main
 
       - name: Setup toolchain
         id: tc

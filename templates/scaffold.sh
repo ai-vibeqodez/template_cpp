@@ -23,7 +23,7 @@ MANAGED="CMakeLists.txt src include tests examples"
 
 # Shared files/dirs copied as-is from the repository root into the generated project.
 # Not rendered (no @@KEY@@ processing) — just cp.
-SHARED_FILES="cmake scripts .clang-format .clang-tidy .editorconfig .gitignore .gitattributes CMakePresets.json VERSION"
+SHARED_FILES="cmake .clang-format .clang-tidy .editorconfig .gitignore .gitattributes CMakePresets.json VERSION"
 KEYS="NAME NAME_ID NAME_UPPER NS NS_OPEN NS_CLOSE NS_PATH NS_UPPER MACRO_PREFIX TYPE"
 LEFTOVER_RE='@@[A-Z0-9_]+@@'
 NAME_RE='^[a-z][a-z0-9_-]*$'
