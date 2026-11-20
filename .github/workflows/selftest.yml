@@ -101,12 +101,38 @@ jobs:
           header_filter: '.*/(include|src)/.*'
 
       # 6. Build & Test (GCC + ThreadSanitizer)
+  # ────────────────────────────────────────────────────────────
+  # TSan needs host ASLR settings that are unavailable inside the CI container.
+  template-tsan:
+    name: Template TSan — ${{ matrix.template }}
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: ${{ fromJSON(needs.discover.outputs.templates) }}
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Scaffold template
+        shell: bash
+        run: |
+          bash templates/scaffold.sh init "${{ matrix.template }}" --name ci_check --ns aw::ci
+          bash templates/scaffold.sh eject
+
+      - name: Configure ThreadSanitizer
+        id: tsan
+        uses: ai-warevo/.github/.github/actions/setup-tsan@main
+        with:
+          toolchain: gcc15
+          container_mode: false
+
       - name: Setup toolchain (GCC + TSan)
-        id: tc_gcc
+        id: tc
         uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: gcc15
-          container_mode: true
+          container_mode: false
           sanitizer: thread
 
       - name: Configure & Build (GCC + TSan)
@@ -115,7 +141,7 @@ jobs:
           source_dir: .
           build_dir: build-tsan
           build_type: RelWithDebInfo
-          extra_args: "${{ steps.tc_gcc.outputs.cmake_args }}"
+          extra_args: "${{ steps.tsan.outputs.stdlib_override }} ${{ steps.tc.outputs.cmake_args }}"
           parallel: false
 
       - name: Run Tests (GCC + TSan)
