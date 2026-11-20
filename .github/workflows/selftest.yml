@@ -70,7 +70,7 @@ jobs:
       # 4. Build & Test (Clang + ASan/UBSan + compile_commands)
       - name: Setup toolchain (Clang + sanitizers)
         id: tc
-        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
+        uses: ai-vibeqodez/.github/.github/actions/setup-toolchain@886a070
         with:
           toolchain: clang18-libcxx
           container_mode: true
@@ -103,7 +103,7 @@ jobs:
       # 6. Build & Test (GCC + ThreadSanitizer)
       - name: Setup toolchain (GCC + TSan)
         id: tc_gcc
-        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
+        uses: ai-vibeqodez/.github/.github/actions/setup-toolchain@886a070
         with:
           toolchain: gcc15
           container_mode: true
