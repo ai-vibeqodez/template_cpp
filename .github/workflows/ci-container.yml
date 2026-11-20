@@ -67,7 +67,7 @@ jobs:
       # Setup toolchain (container mode — no-op installer)
       - name: Setup toolchain
         id: tc
-        uses: ai-vibeqodez/.github/.github/actions/setup-toolchain@886a070
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@886a070
         with:
           toolchain: clang18-libcxx
           container_mode: true
@@ -115,7 +115,7 @@ jobs:
 
       - name: Setup toolchain
         id: tc
-        uses: ai-vibeqodez/.github/.github/actions/setup-toolchain@886a070
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@886a070
         with:
           toolchain: msvc
 
