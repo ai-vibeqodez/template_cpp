@@ -1,8 +1,7 @@
-# Release — derive version → build → release + Docker
+# Release — promote changelog and publish GitHub Release
 #
-# Triggers:
-#   - tag push v* → release from existing CHANGELOG (manual tag creation)
-#   - workflow_dispatch → auto-release: generates changelog, derives version, publishes release
+# Project-specific build and Docker steps are not applicable: this repository
+# generates CMake projects under templates/*/files/ rather than at its root.
 
 name: Release
 
@@ -13,23 +12,20 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version override (X.Y.Z); use auto to derive from CHANGELOG'
+        description: 'Version override (X.Y.Z); use auto to derive from CHANGELOG.md'
         required: false
         default: auto
         type: string
 
 permissions:
   contents: write
-  packages: write
   actions: write
 
 jobs:
   release:
     uses: ai-warevo/.github/.github/workflows/reusable-release.yml@main
     with:
-      source_dir: .
-      build_dir: build
-      docker_context: .
-      dockerfile: Dockerfile
-      image_name: template-cpp
-      version: ${{ github.event.inputs.version || 'auto' }}
+      version: ${{ inputs.version || 'auto' }}
+    permissions:
+      contents: write
+      actions: write
