@@ -111,7 +111,7 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Setup MSVC environment
-        uses: ilammy/msvc-dev-cmd@main
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Setup toolchain
         id: tc
