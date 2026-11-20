@@ -72,7 +72,7 @@ jobs:
           quick-start: 'See the README for installation and usage.'
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@main
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
         with:
           tag_name: ${{ github.event_name == 'push' && github.ref_name || needs.prepare-release.outputs.release_tag }}
           name: ${{ github.event_name == 'push' && github.ref_name || needs.prepare-release.outputs.release_tag }}
