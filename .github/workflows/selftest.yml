@@ -41,7 +41,7 @@ jobs:
     needs: discover
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ai-warevo/ci-cpp20
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     strategy:
       fail-fast: false

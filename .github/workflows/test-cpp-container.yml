@@ -1,6 +1,6 @@
 # Test (container) — C++20 Container Test + Coverage + Badge
 #
-# Uses the ghcr.io/ai-warevo/ci-cpp20 Docker image and composite actions
+# Uses the ghcr.io/ai-warevo/ci-cpp23 Docker image and composite actions
 # from ai-warevo/.github/.github/actions/.
 #
 # Linux-jobs: test matrix + sanitizers + coverage + badge
@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE: ghcr.io/ai-warevo/ci-cpp20
+  IMAGE: ghcr.io/ai-warevo/ci-cpp23
 
 jobs:
   # ────────────────────────────────────────────────────────────

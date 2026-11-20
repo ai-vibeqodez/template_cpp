@@ -31,29 +31,29 @@ jobs:
         with:
           context: .
           load: true
-          tags: ci-cpp20:test
+          tags: ci-cpp23:test
           cache-from: type=gha
 
       - name: Verify toolchain versions
         run: |
           echo "=== g++ ==="
-          docker run --rm ci-cpp20:test g++ --version | head -1
+          docker run --rm ci-cpp23:test g++ --version | head -1
           echo "=== clang++-18 ==="
-          docker run --rm ci-cpp20:test clang++-18 --version | head -1
+          docker run --rm ci-cpp23:test clang++-18 --version | head -1
           echo "=== cmake ==="
-          docker run --rm ci-cpp20:test cmake --version | head -1
+          docker run --rm ci-cpp23:test cmake --version | head -1
           echo "=== ninja ==="
-          docker run --rm ci-cpp20:test ninja --version
+          docker run --rm ci-cpp23:test ninja --version
           echo "=== clang-tidy ==="
-          docker run --rm ci-cpp20:test clang-tidy --version | head -1
+          docker run --rm ci-cpp23:test clang-tidy --version | head -1
           echo "=== clang-format ==="
-          docker run --rm ci-cpp20:test clang-format --version | head -1
+          docker run --rm ci-cpp23:test clang-format --version | head -1
           echo "=== gcovr ==="
-          docker run --rm ci-cpp20:test gcovr --version
+          docker run --rm ci-cpp23:test gcovr --version
 
       - name: Run selftest inside container
         run: |
-          docker run --rm -v "${{ github.workspace }}:/workspace:rw" ci-cpp20:test bash -c '
+          docker run --rm -v "${{ github.workspace }}:/workspace:rw" ci-cpp23:test bash -c '
             cd /workspace && \
             bash templates/selftest.sh
           '
@@ -83,7 +83,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/ai-warevo/ci-cpp20
+          images: ghcr.io/ai-warevo/ci-cpp23
           tags: |
             type=raw,value=${{ github.event.inputs.tag || 'latest' }}
             type=raw,value={{date 'YYYYMMDD'}}-{{sha}}

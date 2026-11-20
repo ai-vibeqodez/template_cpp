@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 #
-# CI image for C++20 projects (tpl / tobus).
-# Pushed to ghcr.io/ai-warevo/ci-cpp20 on tag.
+# CI image for C++23 projects (tpl / tobus).
+# Pushed to ghcr.io/ai-warevo/ci-cpp23 on tag.
 #
 # Toolchains:
 #   gcc-15 (libstdc++) — default gcc/g++ (from Debian forky/unstable)
@@ -14,7 +14,7 @@
 #
 # Usage in GitHub Actions:
 #   runs-on: ubuntu-latest
-#   container: ghcr.io/ai-warevo/ci-cpp20:<tag>
+#   container: ghcr.io/ai-warevo/ci-cpp23:<tag>
 #   (no setup-toolchain action needed)
 
 FROM debian:trixie

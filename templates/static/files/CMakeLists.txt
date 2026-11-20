@@ -36,7 +36,7 @@ endif()
 add_library(@@NAME@@ STATIC src/@@NAME_ID@@.cpp)
 # The alias is the namespace itself (e.g. NS=aw::tpl -> aw::tpl), so it only fits namespaces that end in the project name.
 add_library(@@NS@@ ALIAS @@NAME@@)
-target_compile_features(@@NAME@@ PUBLIC cxx_std_20)
+target_compile_features(@@NAME@@ PUBLIC cxx_std_23)
 target_compile_options(@@NAME@@ PRIVATE ${AW_WARNINGS} ${AW_STRICT_WARNINGS})
 target_sources(@@NAME@@
     PUBLIC

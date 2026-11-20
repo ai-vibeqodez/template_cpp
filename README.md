@@ -1,6 +1,6 @@
 # ⚡ aw::template_cpp
 
-> **A minimal C++20 project generator, like `dotnet new`.**
+> **A minimal C++23 project generator, like `dotnet new`.**
 > Pick a template, run one command, start coding.
 
 [![PR Fast](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-fast.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-fast.yml)
@@ -33,7 +33,7 @@ Git for Windows does not ship `make`. Call the script directly instead:
 | `static`  | `lib`, `library`      | Static library with a public header                              |
 | `dynamic` | `dll`, `so`, `shared` | Shared library with generated export macros (`GenerateExportHeader`) |
 
-All templates are C++20 (`cxx_std_20`), with `-Wall -Wextra -Wpedantic` (or `/W4` on MSVC) and Catch2 v3 tests.
+All templates are C++23 (`cxx_std_23`), with `-Wall -Wextra -Wpedantic` (or `/W4` on MSVC) and Catch2 v3 tests.
 
 ## `make init`
 
@@ -154,7 +154,7 @@ The script needs no edits, because templates are auto-discovered. See [`CLAUDE.m
 
 `make selftest` generates each template into a temporary directory, then configures, builds and runs `ctest`.
 It also checks validation errors, aliases, `--dry-run`, re-init, `--no-tests`, name inference and eject.
-It needs `cmake`, a C++20 compiler, and network access for Catch2 (unless Catch2 v3 is installed).
+It needs `cmake`, a C++23 compiler, and network access for Catch2 (unless Catch2 v3 is installed).
 
 ## License
 

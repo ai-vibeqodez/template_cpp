@@ -33,7 +33,7 @@ function(aw_core_library)
     endif()
 
     target_include_directories(${_LIB_NAME}_core PUBLIC include)
-    target_compile_features(${_LIB_NAME}_core PUBLIC cxx_std_20)
+    target_compile_features(${_LIB_NAME}_core PUBLIC cxx_std_23)
     target_compile_options(${_LIB_NAME}_core PRIVATE ${AW_WARNINGS})
 
     if(_LIB_LINK_PUBLIC)

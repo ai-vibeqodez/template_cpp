@@ -51,7 +51,7 @@ endif
 .PHONY: help list init selftest eject build test lint format clean release release-dry-run changelog changelog-dry-run update
 
 help:
-	@echo "aw::template_cpp — C++20 project generator"
+	@echo "aw::template_cpp — C++23 project generator"
 	@echo ""
 	@echo "Generator:"
 	@echo "  make init TYPE=<type> [NAME=<name>] [NS=<ns>] [OUT=<dir>] [TESTS=0] [DRY=1]"

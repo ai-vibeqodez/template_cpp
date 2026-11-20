@@ -20,7 +20,7 @@ Be respectful, inclusive, and constructive. Harassment or discrimination of any 
 ### Prerequisites
 
 - CMake ≥ 3.21
-- C++ compiler supporting C++20 (GCC ≥ 11, Clang ≥ 14, MSVC ≥ 19.30)
+- C++ compiler supporting C++23 (GCC ≥ 14, Clang ≥ 18, MSVC ≥ 19.40)
 - Git
 
 ### Building

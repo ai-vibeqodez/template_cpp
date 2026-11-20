@@ -1,6 +1,6 @@
 # aw_project_config()
 #
-# Base project configuration: version from file, C++20, compiler warnings.
+# Base project configuration: version from file, C++23, compiler warnings.
 #
 # Usage:
 #   include(cmake/ProjectConfig)
@@ -37,7 +37,7 @@ function(aw_project_config)
     string(STRIP "${_aw_version_raw}" _aw_version)
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_version_file}")
 
-    # --- C++20 ---
+    # --- C++23 ---
     set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS OFF)

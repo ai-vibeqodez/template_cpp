@@ -18,5 +18,5 @@ jobs:
       build_type: Debug
       extra_args: -DCI_CHECK_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       extensions: cpp,hpp,c,h
-      container_image: ghcr.io/ai-warevo/ci-cpp20
+      container_image: ghcr.io/ai-warevo/ci-cpp23
       setup_command: mkdir -p .ci-project && bash templates/scaffold.sh init static --name ci_check --ns aw::ci --out .ci-project

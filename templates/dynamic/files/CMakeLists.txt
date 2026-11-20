@@ -37,7 +37,7 @@ generate_export_header(@@NAME@@
 target_include_directories(@@NAME@@ PUBLIC
     include
     "${CMAKE_CURRENT_BINARY_DIR}/generated/include")
-target_compile_features(@@NAME@@ PUBLIC cxx_std_20)
+target_compile_features(@@NAME@@ PUBLIC cxx_std_23)
 target_compile_options(@@NAME@@ PRIVATE ${AW_WARNINGS})
 
 # Tests exist only if the project was generated with tests (the tests/ directory is optional).

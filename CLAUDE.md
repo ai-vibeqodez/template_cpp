@@ -5,7 +5,7 @@ Read `README.md` for the user-facing API; this file is about *how to change the 
 
 ## Project-specific architecture
 
-This repo is a `dotnet new`-style C++20 project generator. The root stays clean: `CMakeLists.txt`, `src/`, `include/` and `tests/`
+This repo is a `dotnet new`-style C++23 project generator. The root stays clean: `CMakeLists.txt`, `src/`, `include/` and `tests/`
 exist only in a generated project (the template files live under `templates/<type>/files/`).
 
 ### Layout and ownership
