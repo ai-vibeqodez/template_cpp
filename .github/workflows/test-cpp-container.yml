@@ -19,9 +19,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  IMAGE: ghcr.io/ai-warevo/ci-cpp23
-
 jobs:
   # ────────────────────────────────────────────────────────────
   # TEST — Linux (container) — sanitizer matrix
@@ -30,7 +27,7 @@ jobs:
     name: Test (${{ matrix.toolchain }} / ${{ matrix.build_type }} / ${{ matrix.sanitizer || 'none' }})
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     strategy:
       fail-fast: false
@@ -133,7 +130,7 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     needs: test
     if: success()

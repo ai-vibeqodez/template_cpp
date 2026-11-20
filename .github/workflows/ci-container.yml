@@ -21,9 +21,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  IMAGE: ghcr.io/ai-warevo/ci-cpp23
-
 jobs:
   # ────────────────────────────────────────────────────────────
   # SELFTEST — verify all templates
@@ -32,7 +29,7 @@ jobs:
     name: Selftest (all templates)
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     steps:
       - uses: actions/checkout@main
@@ -57,7 +54,7 @@ jobs:
     name: Lint (clang-tidy + clang-format)
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     steps:
       - uses: actions/checkout@main
