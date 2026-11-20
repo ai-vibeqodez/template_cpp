@@ -1,10 +1,10 @@
 # Test (container) — C++20 Container Test + Coverage + Badge
 #
-# Использует Docker-образ ghcr.io/ai-warevo/ci-cpp20 и composite actions
-# из ai-warevo/.github/ci/actions/.
+# Uses the ghcr.io/ai-warevo/ci-cpp20 Docker image and composite actions
+# from ai-warevo/.github/ci/actions/.
 #
 # Linux-jobs: test matrix + sanitizers + coverage + badge
-# MSVC-jobs: test на нативном windows-latest
+# MSVC-jobs: test on native windows-latest
 
 name: Test (container)
 
@@ -26,7 +26,7 @@ env:
 
 jobs:
   # ────────────────────────────────────────────────────────────
-  # TEST — Linux (container) — матрица санитайзеров
+  # TEST — Linux (container) — sanitizer matrix
   # ────────────────────────────────────────────────────────────
   test:
     name: Test (${{ matrix.toolchain }} / ${{ matrix.build_type }} / ${{ matrix.sanitizer || 'none' }})
@@ -43,15 +43,15 @@ jobs:
         build_type:
           - Debug
         include:
-          # clang-18 libc++ с ASan
+          # clang-18 libc++ with ASan
           - toolchain: clang18-libcxx
             build_type: RelWithDebInfo
             sanitizer: address
-          # clang-18 libstdc++ с TSan (TSan требует libstdc++)
+          # clang-18 libstdc++ with TSan (TSan requires libstdc++)
           - toolchain: clang18-libstdcxx
             build_type: RelWithDebInfo
             sanitizer: thread
-          # gcc-15 с UBSan
+          # gcc-15 with UBSan
           - toolchain: gcc15
             build_type: RelWithDebInfo
             sanitizer: undefined

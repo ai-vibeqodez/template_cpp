@@ -1,12 +1,12 @@
 # CI (container) — C++20 Container Workflow
 #
-# Использует Docker-образ ghcr.io/ai-warevo/ci-cpp20 и composite actions
-# из ai-warevo/.github/ci/actions/.
+# Uses the ghcr.io/ai-warevo/ci-cpp20 Docker image and composite actions
+# from ai-warevo/.github/ci/actions/.
 #
 # Linux-jobs: selftest + lint (clang-format + clang-tidy)
-# MSVC-jobs: build + test на нативном windows-latest
+# MSVC-jobs: build + test on native windows-latest
 #
-# selftest запускается отдельно на ubuntu-latest (shellcheck).
+# selftest runs separately on ubuntu-latest (shellcheck).
 
 name: CI (container)
 
@@ -26,7 +26,7 @@ env:
 
 jobs:
   # ────────────────────────────────────────────────────────────
-  # SELFTEST — проверить все шаблоны
+  # SELFTEST — verify all templates
   # ────────────────────────────────────────────────────────────
   selftest:
     name: Selftest (all templates)

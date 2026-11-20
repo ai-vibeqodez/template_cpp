@@ -1,6 +1,6 @@
-# Selftest — генерация всех шаблонов, сборка, тесты, санитайзеры
+# Selftest — generate all templates, build, test, sanitizers
 #
-# Запускает selftest.sh для каждого шаблона, проверяет clang-format,
+# Runs selftest.sh for each template, checks clang-format,
 # clang-tidy, ASan/UBSan (Clang), TSan (GCC).
 
 name: Selftest
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   # ────────────────────────────────────────────────────────────
-  # DISCOVER — найти все шаблоны
+  # DISCOVER — find all templates
   # ────────────────────────────────────────────────────────────
   discover:
     name: Discover Templates
@@ -34,7 +34,7 @@ jobs:
           echo "templates=[$list]" >> "$GITHUB_OUTPUT"
 
   # ────────────────────────────────────────────────────────────
-  # TEMPLATE-CI — каждый шаблон: scaffold + build + test + lint
+  # TEMPLATE-CI — each template: scaffold + build + test + lint
   # ────────────────────────────────────────────────────────────
   template-ci:
     name: Template — ${{ matrix.template }}
@@ -127,7 +127,7 @@ jobs:
           output_on_failure: true
 
   # ────────────────────────────────────────────────────────────
-  # WINDOWS-MSVC — проверка генерации на Windows
+  # WINDOWS-MSVC — template generation check on Windows
   # ────────────────────────────────────────────────────────────
   windows-msvc:
     name: Windows MSVC (all templates)

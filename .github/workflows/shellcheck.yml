@@ -1,7 +1,7 @@
 # ShellCheck — lint generator scripts
 #
-# Проверяет Bash-скрипты генератора шаблонов.
-# Работает на ubuntu-latest (нативный runner, нужен apt-get).
+# Lints the Bash scripts of the template generator.
+# Runs on ubuntu-latest (native runner, needs apt-get).
 
 name: ShellCheck
 
