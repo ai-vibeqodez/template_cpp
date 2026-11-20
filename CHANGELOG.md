@@ -14,6 +14,10 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 ## [Unreleased]
 
+### Changed
+
+- Use the shared reusable release workflow for versioning, changelog promotion, checksums, and GitHub Release publication without building the generator repository root.
+
 ## [0.5.1] - 2026-11-20
 
 ### Changed
