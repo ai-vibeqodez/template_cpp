@@ -14,11 +14,13 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-20
+
 ### Changed
+
 - Route PR fast checks through the shared ai-warevo reusable workflow.
 - Use catalog actions for release automation and remove local release/changelog updater scripts.
 - Stop copying release tooling into generated projects and document contributor guidance in `AGENTS.md`.
-
 
 ## [0.5.0] - 2026-11-18
 
@@ -115,7 +117,8 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 - First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/ai-warevo/template_cpp/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/ai-warevo/template_cpp/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/ai-warevo/template_cpp/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/ai-warevo/template_cpp/compare/v0.4.0...v0.4.1
