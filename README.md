@@ -10,6 +10,10 @@
 The repository root stays clean. `CMakeLists.txt`, `src/`, `include/`, `tests/` and (for some templates) `examples/` appear only after `make init`.
 The generator is pure Bash (3.2+), so it runs on Linux, macOS and Windows Git Bash. It needs no Python.
 
+## CI/CD
+
+`pr-fast.yml` calls the shared `ai-warevo/.github` reusable workflow for formatting, build, clang-tidy, and test checks. The generator selftest, Windows checks, ShellCheck, sanitizer and coverage matrix, and CI-container image checks remain project-specific because they validate this repository's generator and its templates.
+
 ## Quick start
 
 ```sh

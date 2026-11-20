@@ -14,6 +14,10 @@ Maintainer notes (see CLAUDE.md, "Changelog & releases"):
 
 ## [Unreleased]
 
+### Changed
+- Route PR fast checks through the shared ai-warevo reusable workflow.
+
+
 ## [0.5.0] - 2026-11-18
 
 ### Added
