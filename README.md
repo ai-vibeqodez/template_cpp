@@ -101,7 +101,7 @@ These use [`CMakePresets.json`](CMakePresets.json) (`dev` = Debug, `release`, `c
 
 ### Releases
 
-Run **Actions → Release → Run workflow** to promote the prepared `## [Unreleased]` section, choose the next SemVer version from `CHANGELOG.md`, update `VERSION`, create a `vX.Y.Z` tag, and publish a GitHub Release. The optional `version` input accepts an explicit `X.Y.Z` override; leave it as `auto` to derive the version from changelog categories. For a release prepared outside Actions, push its `vX.Y.Z` tag to publish the GitHub Release.
+Run GitHub Actions **Release** workflow to promote the prepared `## [Unreleased]` section, choose the next SemVer version from `CHANGELOG.md`, update `VERSION`, create a `vX.Y.Z` tag, and publish a GitHub Release. The workflow intentionally does not build the repository root because this generator has no root `CMakeLists.txt`; generated projects are validated by the CI workflows. The optional `version` input accepts an explicit `X.Y.Z` override; leave it as `auto` to derive the version from changelog categories. For a release prepared outside Actions, push its `vX.Y.Z` tag to publish the GitHub Release.
 
 ## Layout
 
