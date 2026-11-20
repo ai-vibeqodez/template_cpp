@@ -3,9 +3,9 @@
 > **A minimal C++20 project generator, like `dotnet new`.**
 > Pick a template, run one command, start coding.
 
-[![CI](https://github.com/ai-warevo/template_cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/ci.yml)
-[![Tests & Coverage](https://github.com/ai-warevo/template_cpp/actions/workflows/test.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/test.yml)
-[![coverage](https://raw.githubusercontent.com/ai-warevo/template_cpp/badges/coverage.svg)](https://ai-warevo.github.io/template_cpp/htmlcov/)
+[![PR Fast](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-fast.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-fast.yml)
+[![Selftest](https://github.com/ai-warevo/template_cpp/actions/workflows/selftest.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/selftest.yml)
+[![ShellCheck](https://github.com/ai-warevo/template_cpp/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/shellcheck.yml)
 
 The repository root stays clean. `CMakeLists.txt`, `src/`, `include/`, `tests/` and (for some templates) `examples/` appear only after `make init`.
 The generator is pure Bash (3.2+), so it runs on Linux, macOS and Windows Git Bash. It needs no Python.

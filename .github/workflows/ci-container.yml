@@ -1,7 +1,7 @@
 # CI (container) — C++20 Container Workflow
 #
 # Uses the ghcr.io/ai-warevo/ci-cpp20 Docker image and composite actions
-# from ai-warevo/.github/ci/actions/.
+# from ai-warevo/.github/.github/actions/.
 #
 # Linux-jobs: selftest + lint (clang-format + clang-tidy)
 # MSVC-jobs: build + test on native windows-latest
@@ -70,14 +70,14 @@ jobs:
       # Setup toolchain (container mode — no-op installer)
       - name: Setup toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: clang18-libcxx
           container_mode: true
 
       # Build with compile_commands.json for clang-tidy
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -86,14 +86,14 @@ jobs:
           parallel: false
 
       - name: clang-format check
-        uses: ai-warevo/.github/ci/actions/clang-format@main
+        uses: ai-warevo/.github/.github/actions/clang-format@main
         with:
           source_dir: .
           extensions: cpp,hpp
           exclude: _deps/*,build/*,CMakeFiles/*,cmake/*
 
       - name: clang-tidy
-        uses: ai-warevo/.github/ci/actions/clang-tidy@main
+        uses: ai-warevo/.github/.github/actions/clang-tidy@main
         with:
           source_dir: .
           build_dir: build
@@ -118,12 +118,12 @@ jobs:
 
       - name: Setup toolchain
         id: tc
-        uses: ai-warevo/.github/ci/actions/setup-toolchain@main
+        uses: ai-warevo/.github/.github/actions/setup-toolchain@main
         with:
           toolchain: msvc
 
       - name: Configure & Build
-        uses: ai-warevo/.github/ci/actions/cmake-build@main
+        uses: ai-warevo/.github/.github/actions/cmake-build@main
         with:
           source_dir: .
           build_dir: build
@@ -131,7 +131,7 @@ jobs:
           extra_args: "${{ steps.tc.outputs.cmake_args }}"
 
       - name: Run Tests
-        uses: ai-warevo/.github/ci/actions/ctest-run@main
+        uses: ai-warevo/.github/.github/actions/ctest-run@main
         with:
           source_dir: .
           build_dir: build

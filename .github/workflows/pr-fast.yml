@@ -1,0 +1,22 @@
+# Shared lint/build/test workflow for a generated C++ project.
+# The repository-level selftest and Windows checks stay in selftest.yml.
+
+name: PR Fast
+
+on:
+  pull_request:
+    branches: [main, master]
+  merge_group:
+    branches: [main, master]
+
+jobs:
+  pr-fast:
+    uses: ai-warevo/.github/.github/workflows/reusable-pr-fast.yml@main
+    with:
+      source_dir: .ci-project
+      build_dir: build
+      build_type: Debug
+      extra_args: -DCI_CHECK_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      extensions: cpp,hpp,c,h
+      container_image: ghcr.io/ai-warevo/ci-cpp20
+      setup_command: mkdir -p .ci-project && bash templates/scaffold.sh init static --name ci_check --ns aw::ci --out .ci-project
