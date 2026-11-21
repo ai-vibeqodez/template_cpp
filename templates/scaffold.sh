@@ -19,11 +19,11 @@ ROOT_DIR=$(dirname "$TPL_DIR")
 
 # Top-level entries a template may produce. `init` replaces exactly these, so re-running it is idempotent.
 # (`examples` is only replaced when the template produces it, so hand-written examples/ survive other templates.)
-MANAGED="CMakeLists.txt cmake src include tests examples"
+MANAGED="CMakeLists.txt src include tests examples"
 
 # Shared files/dirs copied as-is from the repository root into the generated project.
 # Not rendered (no @@KEY@@ processing) — just cp.
-SHARED_FILES="cmake .clang-format .clang-tidy .editorconfig .gitignore .gitattributes CMakePresets.json VERSION"
+SHARED_FILES=".clang-format .clang-tidy .editorconfig .gitignore .gitattributes CMakePresets.json VERSION"
 # .example files copied as-is, stripping the .example suffix (e.g. CMakeUserPresets.json.example → CMakeUserPresets.json).
 EXAMPLE_FILES="CMakeUserPresets.json.example"
 KEYS="NAME NAME_ID NAME_UPPER NS NS_OPEN NS_CLOSE NS_PATH NS_UPPER MACRO_PREFIX TYPE"

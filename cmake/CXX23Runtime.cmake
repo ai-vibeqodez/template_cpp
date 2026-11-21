@@ -24,7 +24,7 @@ function(aw_check_cxx23_runtime)
         list(APPEND CMAKE_REQUIRED_FLAGS "-stdlib=libc++")
     endif()
 
-    if(NOT CMAKE_REQUIRED_LIBRARIES MATCHES "Threads::Threads")
+    if(TARGET Threads::Threads)
         list(APPEND CMAKE_REQUIRED_LIBRARIES Threads::Threads)
     endif()
 

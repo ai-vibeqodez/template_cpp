@@ -61,7 +61,7 @@ build_and_test() { # DIR TESTS(1|0)
         echo "=== cygpath: $(command -v cygpath 2>/dev/null || echo not found) ==="
         echo "=== d after cygpath: $d ==="
     } >>"$logfile" 2>&1
-    (cd "$d" && cmake --preset dev $extra_args >>"$logfile" 2>&1 && cmake --build --preset dev >>"$logfile" 2>&1) || {
+    (cd "$d" && cmake --preset dev -DFETCHCONTENT_SOURCE_DIR_AW_CMAKE_MODULES="$ROOT_DIR" $extra_args >>"$logfile" 2>&1 && cmake --build --preset dev >>"$logfile" 2>&1) || {
         echo "=== cmake configure/build output ===" >&2
         cat "$logfile" >&2
         fail "build failed in $1"
@@ -147,7 +147,7 @@ pass "static: examples/, alias, FILE_SET and options rendered"
 dd=$d
 if command -v cygpath >/dev/null 2>&1; then dd=$(cygpath -m "$d"); fi
 inst="$WORK/static-extras-inst"
-(cd "$dd" && cmake -B build/x -DCMAKE_BUILD_TYPE=Debug -DTOBUS_WARNINGS_AS_ERRORS=ON -DCMAKE_INSTALL_PREFIX="$inst" >"$WORK/x.log" 2>&1 \
+(cd "$dd" && cmake -B build/x -DCMAKE_BUILD_TYPE=Debug -DTOBUS_WARNINGS_AS_ERRORS=ON -DCMAKE_INSTALL_PREFIX="$inst" -DFETCHCONTENT_SOURCE_DIR_AW_CMAKE_MODULES="$ROOT_DIR" >"$WORK/x.log" 2>&1 \
     && cmake --build build/x >>"$WORK/x.log" 2>&1 && ctest --test-dir build/x >>"$WORK/x.log" 2>&1 \
     && cmake --install build/x --config Debug >>"$WORK/x.log" 2>&1) || { cat "$WORK/x.log" >&2; fail "static: strict build/test/install failed"; }
 pass "static: -Werror build, tests, examples and install"
@@ -174,7 +174,7 @@ pass "static: installed package works with find_package(tobus) + aw::tobus"
 # Used as a subproject, tests/examples/install default to OFF.
 mkdir -p "$WORK/subproj"
 printf 'cmake_minimum_required(VERSION 3.23)\nproject(sub CXX)\nadd_subdirectory("%s" lib)\nmessage(STATUS "SUB_TESTS=${TOBUS_BUILD_TESTS}")\n' "$dd" >"$WORK/subproj/CMakeLists.txt"
-(cd "$WORK/subproj" && cmake -B b 2>&1 | grep -q 'SUB_TESTS=OFF') || fail "static: tests not OFF when used as a subproject"
+(cd "$WORK/subproj" && cmake -B b -DFETCHCONTENT_SOURCE_DIR_AW_CMAKE_MODULES="$ROOT_DIR" 2>&1 | grep -q 'SUB_TESTS=OFF') || fail "static: tests not OFF when used as a subproject"
 pass "static: options default to OFF as a subproject"
 
 section "out directory"
