@@ -14,6 +14,16 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 ## [Unreleased]
 
+## [0.5.5] - 2026-11-21
+
+### Changed
+
+- ci
+
+### Fixed
+
+- fix
+
 ## [0.5.4] - 2026-11-21
 
 ### Changed
@@ -163,7 +173,8 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 - First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.4...HEAD
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.5...HEAD
+[0.5.5]: https://github.com/ai-warevo/template_cpp/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/ai-warevo/template_cpp/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/ai-warevo/template_cpp/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/ai-warevo/template_cpp/compare/v0.5.1...v0.5.2
