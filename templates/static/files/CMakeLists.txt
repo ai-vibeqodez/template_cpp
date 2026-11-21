@@ -48,7 +48,7 @@ target_sources(@@NAME@@
 
 if(@@NAME_UPPER@@_INSTALL)
     include(cmake/Library/InstallExport)
-    aw_install_library(NAME @@NAME@@ NS @@NS@@ DEPENDENCIES)
+    aw_install_library(TARGET @@NAME@@ NAME @@NAME@@ NS @@NS@@ DEPENDENCIES)
 endif()
 
 # Tests and examples exist only if the project was generated with them (the directories are optional).
