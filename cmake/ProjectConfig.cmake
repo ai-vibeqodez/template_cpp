@@ -46,13 +46,18 @@ function(aw_project_config)
     # --- Compiler warnings (base level) ---
     # AW_WARNINGS: applied to all targets (library + tests)
     # AW_STRICT_WARNINGS: opt-in -Werror for library only (set by caller after project())
-    if(MSVC)
+    #
+    # NOTE: This function runs BEFORE project(), so CMAKE_CXX_COMPILER_ID is empty.
+    # Detect compiler from CMAKE_CXX_COMPILER path (set by toolchain or environment).
+    set(_aw_compiler "${CMAKE_CXX_COMPILER}")
+    if(_aw_compiler MATCHES "(^|[/\\\\])cl($|[/\\\\]|\\.)" OR DEFINED ENV{VSCMD_APP_ATMOSPHERE})
         set(AW_WARNINGS /W4 PARENT_SCOPE)
         set(AW_STRICT_WARNINGS /WX PARENT_SCOPE)
     else()
         set(AW_WARNINGS -Wall -Wextra -Wpedantic PARENT_SCOPE)
         set(AW_STRICT_WARNINGS -Wshadow -Wconversion -Werror PARENT_SCOPE)
     endif()
+    unset(_aw_compiler)
 
     # Export values to caller scope so root CMakeLists.txt can call project().
     set(AW_PROJECT_NAME    "${_CFG_NAME}"    PARENT_SCOPE)
