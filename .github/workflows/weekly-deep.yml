@@ -20,25 +20,7 @@ permissions:
   packages: write
 
 jobs:
-  setup:
-    name: Generate CI project
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Generate project
-        run: mkdir -p .ci-project && bash templates/scaffold.sh init static --name ci_check --ns aw::ci --out .ci-project
-
-      - name: Upload generated project
-        uses: actions/upload-artifact@v4
-        with:
-          name: ci-project
-          path: .ci-project/
-          retention-days: 1
-
   sanitizers:
-    needs: setup
     uses: ai-warevo/.github/.github/workflows/reusable-sanitizers.yml@main
     with:
       source_dir: .ci-project
@@ -56,7 +38,6 @@ jobs:
 
   coverage:
     name: Coverage
-    needs: setup
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/ai-warevo/ci-cpp23
@@ -65,11 +46,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download generated project
-        uses: actions/download-artifact@v4
-        with:
-          name: ci-project
-          path: .ci-project/
+      - name: Generate project
+        run: mkdir -p .ci-project && bash templates/scaffold.sh init static --name ci_check --ns aw::ci --out .ci-project
 
       - name: Install toolchain
         id: tc
