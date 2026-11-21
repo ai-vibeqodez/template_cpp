@@ -3,7 +3,6 @@
 > **A minimal C++23 project generator, like `dotnet new`.**
 > Pick a template, run one command, start coding.
 
-[![PR Fast](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-fast.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-fast.yml)
 [![Selftest](https://github.com/ai-warevo/template_cpp/actions/workflows/selftest.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/selftest.yml)
 [![ShellCheck](https://github.com/ai-warevo/template_cpp/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/shellcheck.yml)
 
