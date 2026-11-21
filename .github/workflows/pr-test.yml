@@ -50,3 +50,5 @@ jobs:
       cmake_extra_args_linux: >-
         -DCI_CHECK_BUILD_TESTS=ON
       ctest_timeout: 120
+      setup_command: >-
+        mkdir -p .ci-project && bash templates/scaffold.sh init static --name ci_check --ns aw::ci --out .ci-project
