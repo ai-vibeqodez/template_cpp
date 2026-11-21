@@ -51,6 +51,8 @@ jobs:
       tsan_test_regex: ''
       asan_options: 'detect_leaks=1:halt_on_error=1'
       tsan_options: 'halt_on_error=1:second_deadlock_stack=1'
+      setup_command: >-
+        mkdir -p .ci-project && bash templates/scaffold.sh init static --name ci_check --ns aw::ci --out .ci-project
 
   coverage:
     name: Coverage
