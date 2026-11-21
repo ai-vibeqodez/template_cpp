@@ -4,26 +4,36 @@
 #
 # Usage:
 #   include(cmake/Library/InstallExport)
-#   aw_install_library(NAME MyLib NS aw:: EXPORT_NAME mylib)
-#   aw_install_library(NAME tpl NS aw::tpl DEPENDENCIES Threads "OtherPkg 2.0")
+#   aw_install_library(TARGET mylib NAME MyLib NS aw:: EXPORT_NAME mylib)
+#   aw_install_library(TARGET aw_tpl NAME tpl NS aw::tpl DEPENDENCIES Threads)
 #
-# NS may be a prefix ("aw::") or, when it does not end in "::", the full alias of the library
-# ("aw::tpl"): consumers then link `aw::tpl`, and the package config is named after NAME.
-# DEPENDENCIES: one find_dependency() call per entry is written into the package config.
+# Parameters:
+#   TARGET (required) — CMake target name (e.g., aw_tpl, mylib_core)
+#   NAME (required) — Package/install name (e.g., tpl, mylib)
+#   NS (required) — Namespace prefix (e.g., aw::) or full alias (e.g., aw::tpl)
+#   EXPORT_NAME — Export name (defaults to NAME)
+#   DEPENDENCIES — List of find_dependency() entries
+#
+# NS without trailing "::" is treated as full alias (aw::tpl):
+#   - Splits into prefix (aw::) and export name (tpl)
+#   - Consumers link `aw::tpl`, package config is named after NAME
 #
 # Requires: GNUInstallDirs, CMakePackageConfigHelpers (included internally)
 # Depends on: CMAKE_CURRENT_BINARY_DIR, CMAKE_CURRENT_SOURCE_DIR, PROJECT_VERSION
 
 function(aw_install_library)
-    set(_oneValue NAME NS EXPORT_NAME)
+    set(_oneValue TARGET NAME NS EXPORT_NAME)
     set(_multiValue DEPENDENCIES)
     cmake_parse_arguments(_INST "" "${_oneValue}" "${_multiValue}" ${ARGN})
 
+    if(NOT _INST_TARGET)
+        message(FATAL_ERROR "aw_install_library() requires TARGET argument (CMake target name)")
+    endif()
     if(NOT _INST_NAME)
-        message(FATAL_ERROR "aw_install_library() requires NAME argument")
+        message(FATAL_ERROR "aw_install_library() requires NAME argument (package name)")
     endif()
     if(NOT _INST_NS)
-        message(FATAL_ERROR "aw_install_library() requires NS argument")
+        message(FATAL_ERROR "aw_install_library() requires NS argument (namespace prefix or full alias)")
     endif()
 
     # NS without a trailing "::" is the full alias (aw::tpl): split it into prefix "aw::" and exported name "tpl".
@@ -46,14 +56,14 @@ function(aw_install_library)
     include(CMakePackageConfigHelpers)
 
     if(_inst_target_name)
-        set_target_properties(${_INST_NAME} PROPERTIES EXPORT_NAME ${_inst_target_name})
+        set_target_properties(${_INST_TARGET} PROPERTIES EXPORT_NAME ${_inst_target_name})
     endif()
 
     # --- Install targets ---
     # CMake 3.23+ supports FILE_SET HEADERS (preferred);
     # for older versions fall back to target_include_directories.
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.23)
-        install(TARGETS ${_INST_NAME}
+        install(TARGETS ${_INST_TARGET}
             EXPORT ${_INST_EXPORT_NAME}Targets
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -61,7 +71,7 @@ function(aw_install_library)
             FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         )
     else()
-        install(TARGETS ${_INST_NAME}
+        install(TARGETS ${_INST_TARGET}
             EXPORT ${_INST_EXPORT_NAME}Targets
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
