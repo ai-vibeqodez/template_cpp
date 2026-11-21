@@ -20,25 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup:
-    name: Generate CI project
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Generate project
-        run: mkdir -p .ci-project && bash templates/scaffold.sh init static --name ci_check --ns aw::ci --out .ci-project
-
-      - name: Upload generated project
-        uses: actions/upload-artifact@v4
-        with:
-          name: ci-project
-          path: .ci-project/
-          retention-days: 1
-
   unit-tests:
-    needs: setup
     uses: ai-warevo/.github/.github/workflows/reusable-matrix.yml@main
     with:
       source_dir: .ci-project
