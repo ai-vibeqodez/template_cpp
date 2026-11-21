@@ -3,8 +3,18 @@
 > **A minimal C++23 project generator, like `dotnet new`.**
 > Pick a template, run one command, start coding.
 
+[![C++23](https://img.shields.io/badge/C++-%2300599C.svg?logo=c%2B%2B&logoColor=white)](https://cppreference.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Coverage](https://raw.githubusercontent.com/ai-warevo/template_cpp/refs/heads/badges/coverage.svg)](https://ai-warevo.github.io/template_cpp)
+<br />
 [![Selftest](https://github.com/ai-warevo/template_cpp/actions/workflows/selftest.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/selftest.yml)
 [![ShellCheck](https://github.com/ai-warevo/template_cpp/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/shellcheck.yml)
+<br />
+[![PR Build](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-build.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-build.yml)
+[![PR Test](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-test.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/pr-test.yml)
+<br />
+[![Weekly Deep](https://github.com/ai-warevo/template_cpp/actions/workflows/weekly-deep.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/weekly-deep.yml)
+[![Release](https://github.com/ai-warevo/template_cpp/actions/workflows/release.yml/badge.svg)](https://github.com/ai-warevo/template_cpp/actions/workflows/release.yml)
 
 The repository root stays clean. `CMakeLists.txt`, `src/`, `include/`, `tests/` and (for some templates) `examples/` appear only after `make init`.
 The generator is pure Bash (3.2+), so it runs on Linux, macOS and Windows Git Bash. It needs no Python.
