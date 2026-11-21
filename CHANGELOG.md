@@ -14,6 +14,20 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-11-21
+
+### Changed
+
+- Update README.md
+- centralize C++23 compiler & consumer integration modules
+- fix
+- fix
+- ci
+
+### Fixed
+
+- cmamke C++23
+
 ## [0.5.2] - 2026-11-20
 
 ### Changed
@@ -132,7 +146,8 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 - First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/ai-warevo/template_cpp/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/ai-warevo/template_cpp/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/ai-warevo/template_cpp/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/ai-warevo/template_cpp/compare/v0.4.2...v0.5.0
