@@ -29,12 +29,12 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 ### Changed
 
 - ci
-- Merge branch 'main' of github.com:ai-warevo/template-cpp
+- Merge branch 'main' of github.com:ai-warevo/template_cpp
 - Merge pull request #7 from ai-vibeqodez/fix/pr-weekly-ci-project
 - ci
 - Merge pull request #6 from ai-warevo/loktionov129-patch-2
 - Update README.md
-- Merge branch 'main' of github.com:ai-warevo/template-cpp
+- Merge branch 'main' of github.com:ai-warevo/template_cpp
 - ci
 
 ### Fixed
@@ -67,7 +67,7 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 - use shared release workflow
 - restore generator release workflow
 - fix
-- Merge branch 'main' of github.com:ai-warevo/template-cpp
+- Merge branch 'main' of github.com:ai-warevo/template_cpp
 - ik
 
 ## [0.5.1] - 2026-11-20
