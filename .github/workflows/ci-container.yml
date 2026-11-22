@@ -1,9 +1,10 @@
 # CI (container) — C++20 Container Workflow
 #
-# Uses a CI container image (default: ghcr.io/ai-warevo/ci-cpp23) and composite
+# Uses a CI container image (ghcr.io/ai-warevo/ci-cpp23) and composite
 # actions from ai-warevo/.github/.github/actions/.
 #
-# Override container via CI_CONTAINER_IMAGE env variable at workflow level.
+# To override container image: fork this file and replace the image value
+# (GitHub Actions does not support env.* in container.image context).
 #
 # Linux-jobs: selftest + lint (clang-format + clang-tidy)
 # MSVC-jobs: build + test on native windows-latest
@@ -21,9 +22,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  CI_CONTAINER_IMAGE: ghcr.io/ai-warevo/ci-cpp23
-
 jobs:
   # ────────────────────────────────────────────────────────────
   # SELFTEST — verify all templates
@@ -32,7 +30,7 @@ jobs:
     name: Selftest (all templates)
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.CI_CONTAINER_IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     steps:
       - uses: actions/checkout@main
@@ -57,7 +55,7 @@ jobs:
     name: Lint (clang-tidy + clang-format)
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.CI_CONTAINER_IMAGE }}
+      image: ghcr.io/ai-warevo/ci-cpp23
       options: --user root
     steps:
       - uses: actions/checkout@main
