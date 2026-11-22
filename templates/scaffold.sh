@@ -19,7 +19,7 @@ ROOT_DIR=$(dirname "$TPL_DIR")
 
 # Top-level entries a template may produce. `init` replaces exactly these, so re-running it is idempotent.
 # (`examples` is only replaced when the template produces it, so hand-written examples/ survive other templates.)
-MANAGED="CMakeLists.txt src include tests examples"
+MANAGED="CMakeLists.txt src include tests examples .github"
 
 # Shared files/dirs copied as-is from the repository root into the generated project.
 # Not rendered (no @@KEY@@ processing) — just cp.
