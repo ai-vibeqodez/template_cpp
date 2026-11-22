@@ -253,6 +253,29 @@ $files
 EOF
     [ "$count" -gt 0 ] || die "template '$type' generated no files"
 
+    # Process _common template files (if any), overlaying them on top of template-specific files.
+    common_src=$TPL_DIR/_common/files
+    if [ -d "$common_src" ]; then
+        common_files=$(cd "$common_src" && find . -type f | LC_ALL=C sort)
+        while IFS= read -r rel; do
+            [ -n "$rel" ] || continue
+            rel=${rel#./}
+            [ "$tests" = 1 ] || case $rel in tests/*) continue ;; esac
+            render_text "$rel"
+            dst=$REPLY
+            if [[ $dst =~ $LEFTOVER_RE ]]; then die "unresolved placeholder ${BASH_REMATCH[0]} in path '$rel' (_common)"; fi
+            top=${dst%%/*}
+            case " $MANAGED " in *" $top "*) ;; *) die "_common template produces '$top', which is not one of: $MANAGED" ;; esac
+            mkdir -p "$stage/$(dirname "$dst")"
+            render_file "$common_src/$rel" "$stage/$dst"
+            kept="$kept$dst
+"
+            count=$((count + 1))
+        done <<EOF
+$common_files
+EOF
+    fi
+
     # Copy shared files/dirs from the repository root into the staging dir.
     # These are not rendered — just copied as-is.
     for item in $SHARED_FILES; do
