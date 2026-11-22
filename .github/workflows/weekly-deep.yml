@@ -65,7 +65,7 @@ jobs:
           extra_args: >-
             ${{ steps.tc.outputs.cmake_args }}
             -DCI_CHECK_BUILD_TESTS=ON
-            -DCI_CHECK_ENABLE_COVERAGE=ON
+            -DAW_ENABLE_COVERAGE=ON
 
       - name: Run Tests
         uses: ai-warevo/.github/.github/actions/ctest-run@main
@@ -81,38 +81,38 @@ jobs:
         with:
           source_dir: .ci-project
           build_dir: build
-          source_filter: "include/ src/"
+          source_filter: "include/ src/ examples/"
           exclude: _deps/*
           output_dir: htmlcov
           xml_path: coverage.xml
 
       - name: Parse Coverage Metrics
         id: coverage_parser
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: ai-warevo/.github/.github/actions/coverage-parser@main
         with:
           xml_path: coverage.xml
 
       - name: Generate Coverage Badge
         id: badge_generator
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: ai-warevo/.github/.github/actions/badge@main
         with:
           width: '99'
           height: '20'
           text_left: 'coverage'
-          text_right: '${{ steps.coverage_parser.outputs.percent }}'
+          text_right: '${{ steps.coverage_parser.outputs.percent }}%'
           bg_color_right: '${{ steps.coverage_parser.outputs.color }}'
           filename: 'coverage.svg'
 
       - name: Deploy Badge
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: ai-warevo/.github/.github/actions/badge-deploy@main
         with:
           badge_path: coverage.svg
 
       - name: Deploy Coverage Report to gh-pages
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: ai-warevo/.github/.github/actions/coverage-html-deploy@main
         with:
           folder: htmlcov
