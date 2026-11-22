@@ -14,13 +14,23 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 ## [Unreleased]
 
+## [0.5.6] - 2026-11-22
+
 ### Changed
 
-- centralize reusable project, target, compiler, test, and subdirectory CMake logic in `AWProject`
+- centralize shared CMake project, target, test helpers in AWProject facade
+- fix
+- Merge pull request #9 from ai-vibeqodez/fix/msvc-compiler-detection
+- Merge pull request #8 from ai-vibeqodez/fix/msvc-fetchcontent-url
+- Merge branch 'main' of github.com:ai-warevo/template_cpp
 
 ### Fixed
 
-- configure MSVC warning flags after compiler detection so generated templates build on Windows
+- configure MSVC warning flags after compiler detection
+- detect MSVC compiler before project() using CMAKE_CXX_COMPILER path
+- detect MSVC compiler before project() using CMAKE_CXX_COMPILER path
+- use template_cpp (underscore) in FetchContent and comments
+- fix
 
 ## [0.5.5] - 2026-11-21
 
@@ -181,7 +191,8 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 - First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.5...HEAD
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.6...HEAD
+[0.5.6]: https://github.com/ai-warevo/template_cpp/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/ai-warevo/template_cpp/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/ai-warevo/template_cpp/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/ai-warevo/template_cpp/compare/v0.5.2...v0.5.3
