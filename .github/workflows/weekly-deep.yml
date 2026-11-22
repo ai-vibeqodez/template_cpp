@@ -13,6 +13,7 @@ name: Weekly Deep
 on:
   schedule:
     - cron: '0 0 * * 1'  # every Monday at 00:00 UTC
+  workflow_dispatch:  # allow manual trigger for testing
   workflow_dispatch:
 
 permissions:
