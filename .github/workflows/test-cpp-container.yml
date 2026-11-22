@@ -1,7 +1,9 @@
 # Test (container) — C++20 Container Test + Coverage + Badge
 #
-# Uses the ghcr.io/ai-warevo/ci-cpp23 Docker image and composite actions
-# from ai-warevo/.github/.github/actions/.
+# Uses a CI container image (default: ghcr.io/ai-warevo/ci-cpp23) and composite
+# actions from ai-warevo/.github/.github/actions/.
+#
+# Override container via CI_CONTAINER_IMAGE env variable at workflow level.
 #
 # Linux-jobs: test matrix + sanitizers + coverage + badge
 # MSVC-jobs: test on native windows-latest
@@ -19,6 +21,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CI_CONTAINER_IMAGE: ghcr.io/ai-warevo/ci-cpp23
+
 jobs:
   # ────────────────────────────────────────────────────────────
   # TEST — Linux (container) — sanitizer matrix
@@ -27,7 +32,7 @@ jobs:
     name: Test (${{ matrix.toolchain }} / ${{ matrix.build_type }} / ${{ matrix.sanitizer || 'none' }})
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ai-warevo/ci-cpp23
+      image: ${{ env.CI_CONTAINER_IMAGE }}
       options: --user root
     strategy:
       fail-fast: false
@@ -130,7 +135,7 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ai-warevo/ci-cpp23
+      image: ${{ env.CI_CONTAINER_IMAGE }}
       options: --user root
     needs: test
     if: success()

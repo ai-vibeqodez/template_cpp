@@ -2,6 +2,8 @@
 #
 # Runs selftest.sh for each template, checks clang-format,
 # clang-tidy, ASan/UBSan (Clang), TSan (GCC).
+#
+# Override container via CI_CONTAINER_IMAGE env variable at workflow level.
 
 name: Selftest
 
@@ -15,6 +17,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  CI_CONTAINER_IMAGE: ghcr.io/ai-warevo/ci-cpp23
 
 jobs:
   # ────────────────────────────────────────────────────────────
@@ -41,7 +46,7 @@ jobs:
     needs: discover
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ai-warevo/ci-cpp23
+      image: ${{ env.CI_CONTAINER_IMAGE }}
       options: --user root
     strategy:
       fail-fast: false
