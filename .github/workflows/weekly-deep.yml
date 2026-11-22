@@ -45,6 +45,6 @@ jobs:
       container_image: ghcr.io/ai-warevo/ci-cpp23
       toolchain: gcc15
       cmake_extra_args: '-DCI_CHECK_BUILD_TESTS=ON -DAW_ENABLE_COVERAGE=ON'
-      gcovr_source_filter: 'include/ src/ examples/'
+      gcovr_source_filter: 'include src examples'
       gcovr_exclude: '_deps/*'
       setup_command: 'mkdir -p .ci-project && bash templates/scaffold.sh init static --name ci_check --ns aw::ci --out .ci-project'
