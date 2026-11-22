@@ -14,6 +14,16 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 ## [Unreleased]
 
+## [0.5.8] - 2026-11-22
+
+### Changed
+
+- Merge branch 'main' of https://github.com/ai-warevo/template_cpp
+
+### Fixed
+
+- remove glob patterns from clang-tidy exclude
+
 ## [0.5.7] - 2026-11-22
 
 ### Changed
@@ -197,7 +207,8 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 - First release of the `template_cpp` repository.
 
-[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.7...HEAD
+[Unreleased]: https://github.com/ai-warevo/template_cpp/compare/v0.5.8...HEAD
+[0.5.8]: https://github.com/ai-warevo/template_cpp/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/ai-warevo/template_cpp/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/ai-warevo/template_cpp/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/ai-warevo/template_cpp/compare/v0.5.4...v0.5.5
