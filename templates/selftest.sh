@@ -137,11 +137,9 @@ d=$(newproj_ver static-extras)
 # shellcheck disable=SC2086
 $SCAFFOLD init static --out "$d" --name tobus --ns aw::tobus >/dev/null || fail "static extras: init failed"
 for p in examples/CMakeLists.txt examples/01_basic.cpp; do [ -e "$d/$p" ] || fail "static: missing $p"; done
-grep -q 'add_library(aw::tobus ALIAS tobus)' "$d/CMakeLists.txt" || fail "static: alias is not the namespace"
-grep -q 'FILE_SET HEADERS' "$d/CMakeLists.txt" || fail "static: no FILE_SET HEADERS"
-for o in TOBUS_BUILD_TESTS TOBUS_BUILD_EXAMPLES TOBUS_INSTALL TOBUS_WARNINGS_AS_ERRORS; do
-    grep -q "option($o " "$d/CMakeLists.txt" || fail "static: missing option $o"
-done
+grep -q 'aw_add_library(TARGET tobus TYPE STATIC ALIAS aw::tobus' "$d/CMakeLists.txt" || fail "static: alias is not the namespace"
+grep -q 'HEADERS include/aw/tobus/tobus.hpp' "$d/CMakeLists.txt" || fail "static: no public headers"
+grep -q 'aw_project_setup(PREFIX TOBUS BUILD_EXAMPLES BUILD_TESTS INSTALL)' "$d/CMakeLists.txt" || fail "static: missing shared project options"
 pass "static: examples/, alias, FILE_SET and options rendered"
 
 dd=$d

@@ -96,6 +96,11 @@ It also provides these options (`<NAME>` is the upper-cased project name, e.g. `
 Public dependencies are declared in two places: `target_link_libraries(... PUBLIC ...)` and `DEPENDENCIES` of `aw_install_library()`,
 which writes one `find_dependency()` per entry into the package config.
 
+The reusable `cmake/AWProject.cmake` facade provides `aw_project_prepare()` / `aw_project_setup()`,
+`aw_add_library()`, `aw_add_executable()`, `aw_setup_tests()`, and the existing install/test helpers.
+Consumer projects can keep source and header manifests local while sharing compiler warnings, C++23 settings,
+test discovery, include paths, and optional subdirectory handling.
+
 ## Project targets
 
 ```sh
@@ -121,7 +126,7 @@ VERSION               project version
 CHANGELOG.md          user-visible changes
 CONTRIBUTING.md       how to contribute
 .clang-format .clang-tidy .editorconfig .gitignore .gitattributes
-cmake/                shared CMake modules (ProjectConfig, Tests, CoreLibrary, Library/, Windows/)
+cmake/                shared CMake modules (ProjectConfig, AWProject, Tests, CoreLibrary, Library/, Windows/)
 templates/
   scaffold.sh         the generator: list | init | eject
   selftest.sh         generates, builds and tests every template

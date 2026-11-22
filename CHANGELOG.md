@@ -14,6 +14,10 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 ## [Unreleased]
 
+### Changed
+
+- centralize reusable project, target, compiler, test, and subdirectory CMake logic in `AWProject`
+
 ### Fixed
 
 - configure MSVC warning flags after compiler detection so generated templates build on Windows

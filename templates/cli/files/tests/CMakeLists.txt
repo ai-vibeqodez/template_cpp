@@ -1,2 +1,6 @@
 include(Tests)
-aw_test_target(NAME @@NAME@@ TESTS_SOURCE @@NAME_ID@@_tests.cpp LINK_TARGET @@NS@@::@@NAME@@_core)
+if(@@NAME_UPPER@@_WARNINGS_AS_ERRORS)
+    aw_test_target(NAME @@NAME@@ TESTS_SOURCE @@NAME_ID@@_tests.cpp LINK_TARGET @@NS@@::@@NAME@@_core STRICT_WARNINGS)
+else()
+    aw_test_target(NAME @@NAME@@ TESTS_SOURCE @@NAME_ID@@_tests.cpp LINK_TARGET @@NS@@::@@NAME@@_core)
+endif()

@@ -22,11 +22,13 @@ function(aw_configure_compiler)
         message(FATAL_ERROR "aw_configure_compiler() requires TARGET argument")
     endif()
 
-    # Strict warnings (only if explicitly requested via STRICT_WARNINGS)
-    if(_CFG_STRICT_WARNINGS)
-        if(DEFINED AW_STRICT_WARNINGS AND NOT AW_STRICT_WARNINGS STREQUAL "")
-            target_compile_options(${_CFG_TARGET} PRIVATE ${AW_STRICT_WARNINGS})
-        endif()
+    # Baseline warnings apply to every target built by the project. Strict
+    # warnings are opt-in for the target that owns the policy option.
+    if(DEFINED AW_WARNINGS AND NOT AW_WARNINGS STREQUAL "")
+        target_compile_options(${_CFG_TARGET} PRIVATE ${AW_WARNINGS})
+    endif()
+    if(_CFG_STRICT_WARNINGS AND DEFINED AW_STRICT_WARNINGS AND NOT AW_STRICT_WARNINGS STREQUAL "")
+        target_compile_options(${_CFG_TARGET} PRIVATE ${AW_STRICT_WARNINGS})
     endif()
 
     # Sanitizers (PUBLIC so consumers are also instrumented)
