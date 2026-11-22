@@ -7,9 +7,12 @@
 #   aw_project_config(NAME MyLib NS aw::)
 #   project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
 #
-# Sets: AW_PROJECT_NAME, AW_PROJECT_VERSION, AW_WARNINGS,
+# Sets: AW_PROJECT_NAME, AW_PROJECT_VERSION,
 #       CMAKE_CXX_STANDARD, CMAKE_CXX_STANDARD_REQUIRED,
 #       CMAKE_CXX_EXTENSIONS, CMAKE_EXPORT_COMPILE_COMMANDS, _NS
+#
+# Call aw_configure_warnings() after project() to set AW_WARNINGS and
+# AW_STRICT_WARNINGS for the detected compiler.
 
 # Ensure cmake/ modules are findable when included from the root CMakeLists.txt.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
@@ -47,17 +50,8 @@ function(aw_project_config)
     # AW_WARNINGS: applied to all targets (library + tests)
     # AW_STRICT_WARNINGS: opt-in -Werror for library only (set by caller after project())
     #
-    # NOTE: This function runs BEFORE project(), so CMAKE_CXX_COMPILER_ID is empty.
-    # Detect compiler from CMAKE_CXX_COMPILER path (set by toolchain or environment).
-    set(_aw_compiler "${CMAKE_CXX_COMPILER}")
-    if(_aw_compiler MATCHES "(^|[/\\\\])cl($|[/\\\\]|\\.)" OR DEFINED ENV{VSCMD_APP_ATMOSPHERE})
-        set(AW_WARNINGS /W4 PARENT_SCOPE)
-        set(AW_STRICT_WARNINGS /WX PARENT_SCOPE)
-    else()
-        set(AW_WARNINGS -Wall -Wextra -Wpedantic PARENT_SCOPE)
-        set(AW_STRICT_WARNINGS -Wshadow -Wconversion -Werror PARENT_SCOPE)
-    endif()
-    unset(_aw_compiler)
+    # Compiler identification is unavailable before project(), so select the
+    # warning flags after the caller has enabled the CXX language.
 
     # Export values to caller scope so root CMakeLists.txt can call project().
     set(AW_PROJECT_NAME    "${_CFG_NAME}"    PARENT_SCOPE)
@@ -67,4 +61,16 @@ function(aw_project_config)
     set(CMAKE_CXX_STANDARD_REQUIRED ON PARENT_SCOPE)
     set(CMAKE_CXX_EXTENSIONS OFF PARENT_SCOPE)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON PARENT_SCOPE)
+endfunction()
+
+# Select compiler warning flags after project() has identified the compiler.
+# Call this immediately after project() and before creating targets.
+function(aw_configure_warnings)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        set(AW_WARNINGS /W4 PARENT_SCOPE)
+        set(AW_STRICT_WARNINGS /WX PARENT_SCOPE)
+    else()
+        set(AW_WARNINGS -Wall -Wextra -Wpedantic PARENT_SCOPE)
+        set(AW_STRICT_WARNINGS -Wshadow -Wconversion -Werror PARENT_SCOPE)
+    endif()
 endfunction()

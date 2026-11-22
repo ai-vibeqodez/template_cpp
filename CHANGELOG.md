@@ -14,6 +14,10 @@ Maintainer notes (see AGENTS.md, "Changelog and releases"):
 
 ## [Unreleased]
 
+### Fixed
+
+- configure MSVC warning flags after compiler detection so generated templates build on Windows
+
 ## [0.5.5] - 2026-11-21
 
 ### Changed

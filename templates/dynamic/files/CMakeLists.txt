@@ -22,6 +22,7 @@ include(ProjectConfig)
 aw_project_config(NAME @@NAME@@ NS @@NS@@)
 
 project(${AW_PROJECT_NAME} VERSION ${AW_PROJECT_VERSION} LANGUAGES CXX)
+aw_configure_warnings()
 
 # --- Additional cmake modules (must come after project()) ---
 include(CXX23Runtime)
@@ -94,13 +95,11 @@ target_sources(@@NAME@@
             include/@@NS_PATH@@/@@NAME_ID@@.hpp
 )
 
-# Apply compiler-specific configuration (GCC/Clang only — MSVC warning flags differ)
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    if(@@NAME_UPPER@@_WARNINGS_AS_ERRORS)
-        aw_configure_compiler(TARGET @@NAME@@ STRICT_WARNINGS)
-    else()
-        aw_configure_compiler(TARGET @@NAME@@)
-    endif()
+# Apply compiler-specific configuration
+if(@@NAME_UPPER@@_WARNINGS_AS_ERRORS)
+    aw_configure_compiler(TARGET @@NAME@@ STRICT_WARNINGS)
+else()
+    aw_configure_compiler(TARGET @@NAME@@)
 endif()
 
 # --- Install & Package Export ---
