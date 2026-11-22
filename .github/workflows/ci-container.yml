@@ -85,7 +85,7 @@ jobs:
         with:
           source_dir: .
           extensions: cpp,hpp
-          exclude: _deps/*,build/*,CMakeFiles/*,cmake/*
+          exclude: _deps,CMakeFiles,cmake
 
       - name: clang-tidy
         uses: ai-warevo/.github/.github/actions/clang-tidy@main
@@ -93,7 +93,7 @@ jobs:
           source_dir: .
           build_dir: build
           header_filter: '.*'
-          exclude: _deps/*,build/*,CMakeFiles/*,cmake/*
+          exclude: _deps,CMakeFiles,cmake
 
   # ────────────────────────────────────────────────────────────
   # BUILD-TEST — MSVC (Windows, native runner)
